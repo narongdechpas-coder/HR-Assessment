@@ -77,21 +77,73 @@ export function Dashboard() {
     setExportMsg(res === 'saved' ? `ส่งออก ${data.length} แถวแล้ว` : res === 'declined' ? 'ยกเลิกการบันทึกไฟล์' : 'ส่งออกไม่สำเร็จ')
   }
 
-  return (
-    <div className="mx-auto max-w-4xl space-y-5 px-4 py-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold">HR Dashboard · วางแผน Training</h1>
-          <p className="text-sm text-ink-2">{CYCLE.name}</p>
-        </div>
-        <div className="flex flex-col items-end gap-1">
-          <Button onClick={doExport}>Export Excel</Button>
-          {exportMsg && <span className="text-xs text-ink-2">{exportMsg}</span>}
-        </div>
-      </div>
+  const catCard = (g: 'core' | 'functional' | 'leadership') => {
+    const c = cats.find((x) => x.group === g)
+    if (!c) return null
+    return (
+        <Card className="h-full">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+            <h2 className="font-semibold">{TH_GROUP[c.group]}</h2>
+            <span className="text-sm text-ink-2">
+              อัตราต่ำกว่าเป้า {Math.round(c.rate * 100)}% · {Math.round(c.shareOfGaps * 100)}% ของ gap ทั้งหมด
+            </span>
+          </div>
+          <p className="text-xs text-ink-3">เรียงจากอัตราคนต่ำกว่าเป้ามากไปน้อย · แตะหรือชี้ที่แท่งเพื่อดูรายละเอียด</p>
+          {c.group === 'functional' ? <FunctionalByDept depts={fnDept} /> : <CompetencyStack comps={c.comps} />}
+        </Card>
+    )
+  }
 
+  const totalEmp = prog.reduce((t, d) => t + d.total, 0)
+  const confirmedN = prog.reduce((t, d) => t + d.counts.confirmed, 0)
+  const submittedN = prog.reduce((t, d) => t + d.counts.submitted, 0)
+  const belowN = rows.filter((r) => r.gap < 0).length
+  const flagged = calib.managers.filter((m) => m.flag).length
+  const kpis = [
+    { label: 'หัวหน้ายืนยันแล้ว', value: `${confirmedN}/${totalEmp}`, sub: `${totalEmp ? Math.round((confirmedN / totalEmp) * 100) : 0}% ของพนักงานทั้งหมด` },
+    { label: 'รอหัวหน้าทบทวน', value: `${submittedN} คน`, sub: 'ส่งแล้ว ยังไม่ได้ยืนยัน' },
+    { label: 'อัตราต่ำกว่าเป้ารวม', value: `${rows.length ? Math.round((belowN / rows.length) * 100) : 0}%`, sub: `${belowN} จาก ${rows.length} ข้อ-คน`, tone: 'critical' as const },
+    { label: 'หัวหน้าที่ควรคุย calibration', value: `${flagged} คน`, sub: `จาก ${calib.managers.length} คนที่ยืนยันผลแล้ว`, tone: flagged ? ('critical' as const) : undefined },
+  ]
+
+  return (
+    <div className="mx-auto grid max-w-[1600px] grid-cols-1 gap-4 px-4 py-6 lg:grid-cols-12">
+      <div className="lg:col-span-12">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 className="text-xl font-semibold">HR Dashboard · วางแผน Training</h1>
+            <p className="text-sm text-ink-2">
+              {CYCLE.name} · ข้อมูลจาก {people} คน {includePending ? '(รวมผลที่ยังรอหัวหน้ายืนยัน)' : '(เฉพาะที่หัวหน้ายืนยันแล้ว)'}
+            </p>
+            {includePending && (
+              <p className="text-xs text-warn-ink">ผลที่ยังไม่ผ่านหัวหน้าใช้คะแนนที่พนักงานให้ตัวเอง ซึ่งมักสูงกว่าจริง gap จะดูเล็กกว่าความเป็นจริง</p>
+            )}
+          </div>
+          <div className="flex flex-col items-end gap-1">
+            <div className="flex flex-wrap items-center justify-end gap-3">
+              <label className="flex cursor-pointer items-center gap-2 text-sm text-ink-2">
+                <input type="checkbox" checked={includePending} onChange={(e) => setIncludePending(e.target.checked)} />
+                รวมผลที่ยังรอหัวหน้ายืนยัน
+              </label>
+              <Button onClick={doExport}>Export Excel</Button>
+            </div>
+            {exportMsg && <span className="text-xs text-ink-2">{exportMsg}</span>}
+          </div>
+        </div>
+
+      </div>
+      <div className="grid grid-cols-2 gap-4 lg:col-span-12 lg:grid-cols-4">
+        {kpis.map((k) => (
+          <Card key={k.label} className="h-full p-4!">
+            <div className="text-xs text-ink-2">{k.label}</div>
+            <div className={`mt-1 text-2xl font-semibold ${k.tone === 'critical' ? 'text-critical' : ''}`}>{k.value}</div>
+            <div className="text-xs text-ink-3">{k.sub}</div>
+          </Card>
+        ))}
+      </div>
+      <div className="lg:col-span-6 xl:col-span-4">
       {/* 1. ความคืบหน้า */}
-      <Card>
+      <Card className="h-full">
         <h2 className="font-semibold">ความคืบหน้าการประเมิน</h2>
         {(() => {
           const segs = [
@@ -116,7 +168,7 @@ export function Dashboard() {
                   </span>
                 ))}
               </div>
-              <ul className="mt-3 grid gap-x-6 gap-y-1.5 sm:grid-cols-2">
+              <ul className="mt-3 grid gap-x-6 gap-y-1.5 sm:grid-cols-2 xl:grid-cols-1">
                 {prog.map((d) => (
                   <li key={d.dept} className="grid grid-cols-[5.5rem_1fr_2.5rem] items-center gap-2 text-sm" title={TH_DEPT[d.dept]}>
                     <span className="truncate text-ink-2">{SHORT[d.dept]}</span>
@@ -156,24 +208,10 @@ export function Dashboard() {
         </details>
       </Card>
 
-      {/* ตัวกรองข้อมูล */}
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line bg-surface px-4 py-3 text-sm">
-        <span className="text-ink-2">
-          ข้อมูลด้านล่างมาจาก {people} คน {includePending ? '(รวมผลที่ยังรอหัวหน้ายืนยัน)' : '(เฉพาะที่หัวหน้ายืนยันแล้ว)'}
-        </span>
-        <label className="flex cursor-pointer items-center gap-2">
-          <input type="checkbox" checked={includePending} onChange={(e) => setIncludePending(e.target.checked)} />
-          รวมผลที่ยังรอหัวหน้ายืนยัน
-        </label>
       </div>
-      {includePending && (
-        <p className="-mt-3 text-xs text-warn-ink">
-          ผลที่ยังไม่ผ่านหัวหน้าใช้คะแนนที่พนักงานให้ตัวเอง ซึ่งมักสูงกว่าจริง gap จะดูเล็กกว่าความเป็นจริง
-        </p>
-      )}
-
+      <div className="lg:col-span-6 xl:col-span-4">
       {/* 2. Training แยกหมวด */}
-      <Card>
+      <Card className="h-full">
         <h2 className="font-semibold">Training แยกตามหมวด</h2>
         <p className="text-sm text-ink-2">หมวดไหนมี gap มากที่สุด และในหมวดนั้นเรื่องไหนมีอัตราคนต่ำกว่าเป้าสูงสุด</p>
         {cats.length === 0 ? (
@@ -183,7 +221,7 @@ export function Dashboard() {
             <div className="mt-3">
               <StackLegend />
             </div>
-            <div className="mt-2 grid gap-4 sm:grid-cols-[1fr_1.4fr] sm:items-end">
+            <div className="mt-2 grid gap-4 sm:grid-cols-[1fr_1.4fr] sm:items-end xl:grid-cols-1">
               <CategoryOverview cats={cats} />
               <ul className="space-y-2 text-sm">
                 {[...cats]
@@ -208,21 +246,51 @@ export function Dashboard() {
         )}
       </Card>
 
-      {cats.map((c) => (
-        <Card key={c.group}>
-          <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-            <h2 className="font-semibold">{TH_GROUP[c.group]}</h2>
-            <span className="text-sm text-ink-2">
-              อัตราต่ำกว่าเป้า {Math.round(c.rate * 100)}% · {Math.round(c.shareOfGaps * 100)}% ของ gap ทั้งหมด
-            </span>
-          </div>
-          <p className="text-xs text-ink-3">เรียงจากอัตราคนต่ำกว่าเป้ามากไปน้อย · แตะหรือชี้ที่แท่งเพื่อดูรายละเอียด</p>
-          {c.group === 'functional' ? <FunctionalByDept depts={fnDept} /> : <CompetencyStack comps={c.comps} />}
-        </Card>
-      ))}
+      </div>
+      <div className="lg:col-span-12 xl:col-span-4">
+      {/* 4. Calibration */}
+      <Card className="h-full">
+        <h2 className="font-semibold">Calibration หัวหน้า</h2>
+        <p className="text-sm text-ink-2">
+          จาก {calib.n} ข้อที่หัวหน้ายืนยันแล้ว พนักงานให้คะแนนตัวเอง
+          {calib.selfMinusReview >= 0 ? 'สูงกว่า' : 'ต่ำกว่า'}หัวหน้าเฉลี่ย{' '}
+          <b className="font-semibold text-ink">{Math.abs(calib.selfMinusReview).toFixed(2)} ระดับ</b>ต่อข้อ
+        </p>
+        <ul className="mt-3 max-h-[22rem] divide-y divide-line overflow-y-auto pr-1">
+          {calib.managers.map((m) => (
+            <li key={m.manager.id} className="flex flex-wrap items-center justify-between gap-2 py-2.5">
+              <span className="flex items-center gap-2 text-sm">
+                <Avatar id={m.manager.id} name={m.manager.name} size={32} />
+                <span>
+                  {m.manager.name}
+                  <span className="block text-xs text-ink-3">ยืนยันแล้ว {m.reviewed} คน ({m.items} ข้อ)</span>
+                </span>
+              </span>
+              <span className="flex items-center gap-3 text-sm">
+                <span className="text-ink-2">เห็นด้วย {Math.round(m.agreeRate * 100)}%</span>
+                <span className="w-24 text-right text-ink-2">ปรับเฉลี่ย {m.avgDiff > 0 ? '+' : ''}{m.avgDiff.toFixed(2)}</span>
+                {m.flag ? (
+                  <span className="rounded-full bg-critical-soft px-2.5 py-0.5 text-xs font-medium text-critical">⚠ ควรคุย</span>
+                ) : (
+                  <span className="rounded-full bg-good-soft px-2.5 py-0.5 text-xs font-medium text-good">✓ ปกติ</span>
+                )}
+              </span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-2 text-xs text-ink-3">
+          "ควรคุย" = เห็นด้วยกับลูกทีมตั้งแต่ {Math.round(RUBBER_STAMP_THRESHOLD * 100)}% ของข้อขึ้นไป อาจเป็นการยืนยันผ่านๆ
+          ไม่ได้แปลว่าผิดเสมอไป ทีมที่เก่งจริงก็เป็นแบบนี้ได้ HR ควรคุยเพื่อดูหลักฐานประกอบ
+        </p>
+      </Card>
 
+      </div>
+      <div className="lg:col-span-12 xl:col-span-6">{catCard('core')}</div>
+      <div className="lg:col-span-12 xl:col-span-6">{catCard('leadership')}</div>
+      <div className="lg:col-span-12 xl:col-span-6">{catCard('functional')}</div>
+      <div className="lg:col-span-12 xl:col-span-6">
       {/* 3. Heatmap */}
-      <Card>
+      <Card className="h-full">
         <h2 className="font-semibold">% คนที่ต่ำกว่าเป้า แยกตามฝ่าย</h2>
         <p className="text-sm text-ink-2">เขียว = ส่วนใหญ่ถึงเป้า · แดง = ส่วนใหญ่ต่ำกว่าเป้า · Functional รวม 4 หัวข้อของแต่ละฝ่าย</p>
         <div className="relative mt-3 overflow-x-auto [contain:inline-size]">
@@ -301,45 +369,12 @@ export function Dashboard() {
         </div>
       </Card>
 
-      {/* 4. Calibration */}
-      <Card>
-        <h2 className="font-semibold">Calibration หัวหน้า</h2>
-        <p className="text-sm text-ink-2">
-          จาก {calib.n} ข้อที่หัวหน้ายืนยันแล้ว พนักงานให้คะแนนตัวเอง
-          {calib.selfMinusReview >= 0 ? 'สูงกว่า' : 'ต่ำกว่า'}หัวหน้าเฉลี่ย{' '}
-          <b className="font-semibold text-ink">{Math.abs(calib.selfMinusReview).toFixed(2)} ระดับ</b>ต่อข้อ
-        </p>
-        <ul className="mt-3 divide-y divide-line">
-          {calib.managers.map((m) => (
-            <li key={m.manager.id} className="flex flex-wrap items-center justify-between gap-2 py-2.5">
-              <span className="flex items-center gap-2 text-sm">
-                <Avatar id={m.manager.id} name={m.manager.name} size={32} />
-                <span>
-                  {m.manager.name}
-                  <span className="block text-xs text-ink-3">ยืนยันแล้ว {m.reviewed} คน ({m.items} ข้อ)</span>
-                </span>
-              </span>
-              <span className="flex items-center gap-3 text-sm">
-                <span className="text-ink-2">เห็นด้วย {Math.round(m.agreeRate * 100)}%</span>
-                <span className="w-24 text-right text-ink-2">ปรับเฉลี่ย {m.avgDiff > 0 ? '+' : ''}{m.avgDiff.toFixed(2)}</span>
-                {m.flag ? (
-                  <span className="rounded-full bg-critical-soft px-2.5 py-0.5 text-xs font-medium text-critical">⚠ ควรคุย</span>
-                ) : (
-                  <span className="rounded-full bg-good-soft px-2.5 py-0.5 text-xs font-medium text-good">✓ ปกติ</span>
-                )}
-              </span>
-            </li>
-          ))}
-        </ul>
-        <p className="mt-2 text-xs text-ink-3">
-          "ควรคุย" = เห็นด้วยกับลูกทีมตั้งแต่ {Math.round(RUBBER_STAMP_THRESHOLD * 100)}% ของข้อขึ้นไป อาจเป็นการยืนยันผ่านๆ
-          ไม่ได้แปลว่าผิดเสมอไป ทีมที่เก่งจริงก็เป็นแบบนี้ได้ HR ควรคุยเพื่อดูหลักฐานประกอบ
-        </p>
-      </Card>
-
+      </div>
+      <div className="lg:col-span-12">
       <p className="text-xs text-ink-3">
         ระดับ: {Object.entries(TH_LEVEL).slice(0, 5).map(([k, v]) => `${k} ${v}`).join(' · ')} · Track: {TH_TRACK.Management} / {TH_TRACK.Specialist}
       </p>
+      </div>
     </div>
   )
 }

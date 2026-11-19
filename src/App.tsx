@@ -47,7 +47,7 @@ export default function App() {
       <DemoBanner />
       {emp && (
         <header className="border-b border-line bg-surface">
-          <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-2 px-4 py-3">
+          <div className={`mx-auto flex flex-wrap items-center justify-between gap-2 px-4 py-3 ${view === 'dashboard' ? 'max-w-[1600px]' : 'max-w-4xl'}`}>
             <nav className="flex flex-wrap items-center gap-1 text-sm">
               {tab('home', 'ของฉัน')}
               {emp.hrAdmin && tab('dashboard', 'HR Dashboard')}

@@ -41,7 +41,7 @@ export function Column({
   const segs = (['ok', 'below1', 'below2'] as const).map((k) => ({ k, v: c[k], color: SEG.find((s) => s.key === k)!.color }))
   return (
     <div
-      className={`flex w-[76px] flex-none cursor-pointer flex-col items-center rounded-lg pt-1 outline-none sm:w-auto sm:min-w-[64px] sm:flex-1 ${active ? 'bg-surface-2' : ''}`}
+      className={`flex w-[76px] flex-none cursor-pointer flex-col items-center rounded-lg pt-1 outline-none sm:w-auto sm:min-w-[56px] sm:flex-1 ${active ? 'bg-surface-2' : ''}`}
       tabIndex={0}
       onMouseEnter={() => onActive(true)}
       onFocus={() => onActive(true)}
@@ -76,7 +76,6 @@ export const tipFor = (name: string, c: Counts, extra: string[] = []) => [
 /** ภาพรวม 3 หมวด: หมวดไหนมี gap มากที่สุด */
 export function CategoryOverview({ cats }: { cats: CategoryStack[] }) {
   const [active, setActive] = useState<string | null>(null)
-  const top = [...cats].sort((a, b) => b.shareOfGaps - a.shareOfGaps)[0]?.group
   return (
     <div>
     <div className="flex items-end justify-around gap-2">
@@ -93,7 +92,6 @@ export function CategoryOverview({ cats }: { cats: CategoryStack[] }) {
         />
       ))}
     </div>
-    <Detail tip={(() => { const c = cats.find((x) => x.group === active) ?? cats.find((x) => x.group === top)!; return tipFor(TH_GROUP[c.group], c, [`คิดเป็น ${Math.round(c.shareOfGaps * 100)}% ของ gap ทั้งหมด`]) })()} />
     </div>
   )
 }
