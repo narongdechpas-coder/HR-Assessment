@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import type { CategoryStack, CompStack } from '../lib/analytics'
-import { TH_GROUP } from '../data/th'
+import type { CategoryStack, CompStack, DeptFunctional } from '../lib/analytics'
+import { DEPT_SHORT, TH_DEPT, TH_GROUP } from '../data/th'
 
 // ลำดับสี (ordinal ramp สีน้ำเงิน): ขาดมาก = เข้ม, ขาดน้อย = อ่อน, ผ่านเป้า = เทาเป็นกลาง
 export const SEG = [
@@ -25,7 +25,7 @@ export function StackLegend() {
 }
 
 /** แท่ง stacked แนวตั้ง 100% — ส่วนที่ขาดเป้าอยู่ล่างสุด ตัวเลขด้านบน = % ต่ำกว่าเป้า */
-function Column({
+export function Column({
   c, height, label, sub, tip, active, onActive, highlight,
 }: {
   c: Counts
@@ -66,7 +66,7 @@ function Column({
   )
 }
 
-const tipFor = (name: string, c: Counts, extra: string[] = []) => [
+export const tipFor = (name: string, c: Counts, extra: string[] = []) => [
   name,
   `ต่ำกว่าเป้า ${c.below1 + c.below2} จาก ${c.n} (${c.n ? Math.round(((c.below1 + c.below2) / c.n) * 100) : 0}%)`,
   `ขาด 2+ ระดับ ${c.below2} · ขาด 1 ระดับ ${c.below1} · ผ่านเป้า ${c.ok}`,
@@ -98,13 +98,12 @@ export function CategoryOverview({ cats }: { cats: CategoryStack[] }) {
   )
 }
 
-const SHORT_DEPT: Record<string, string> = { D01: 'UW', D02: 'Claims' }
 
 /** แยกรายหัวข้อในหมวด เรียงจากอัตราต่ำกว่าเป้ามากไปน้อย */
 export function CompetencyStack({ comps, showDept }: { comps: CompStack[]; showDept?: boolean }) {
   const [active, setActive] = useState<string | null>(null)
   return (
-    <div className="overflow-x-auto [contain:inline-size]">
+    <div className="relative overflow-x-auto [contain:inline-size]">
       <div className="flex min-w-max items-end gap-1 sm:min-w-0">
         {comps.map((c, i) => {
           const d = showDept ? c.item.dept : null
@@ -114,7 +113,7 @@ export function CompetencyStack({ comps, showDept }: { comps: CompStack[]; showD
               c={c}
               height={130}
               label={c.item.name}
-              sub={`${c.below1 + c.below2}/${c.n} คน${d ? ` · ${SHORT_DEPT[d] ?? d}` : ''}`}
+              sub={`${c.below1 + c.below2}/${c.n} คน${d ? ` · ${DEPT_SHORT[d] ?? d}` : ''}`}
               tip={tipFor(`${c.item.name} (${c.item.nameEn})`, c, c.levels.length ? [`กลุ่มเป้าหมาย ${c.levels.join(', ')}`] : [])}
               active={active === c.item.id}
               onActive={(on) => setActive(on ? c.item.id : null)}
@@ -141,6 +140,46 @@ function Detail({ tip }: { tip: string[] }) {
     <div className="mt-2 rounded-lg bg-surface-2 p-2.5 text-xs" aria-live="polite">
       <div className="font-medium text-ink">{tip[0]}</div>
       <div className="text-ink-2">{tip.slice(1).join(' · ')}</div>
+    </div>
+  )
+}
+
+/** Functional: ภาพรวมรายฝ่าย แล้วเลือกฝ่ายเพื่อดู 4 หัวข้อของฝ่ายนั้น */
+export function FunctionalByDept({ depts }: { depts: DeptFunctional[] }) {
+  const [active, setActive] = useState<string | null>(null)
+  const [pick, setPick] = useState<string>(depts[0]?.dept ?? '')
+  const chosen = depts.find((d) => d.dept === pick) ?? depts[0]
+  if (!chosen) return null
+  const cur = depts.find((d) => d.dept === active) ?? chosen
+  return (
+    <div>
+      <p className="mt-3 text-xs font-medium text-ink-2">ภาพรวมรายฝ่าย (แตะแท่งเพื่อดู 4 หัวข้อของฝ่ายนั้น)</p>
+      <div className="relative overflow-x-auto [contain:inline-size]">
+        <div className="flex min-w-max items-end gap-1 sm:min-w-0">
+          {depts.map((d) => (
+            <Column
+              key={d.dept}
+              c={d}
+              height={110}
+              label={DEPT_SHORT[d.dept] ?? d.dept}
+              sub={`${d.below1 + d.below2}/${d.n} ข้อ`}
+              tip={tipFor(TH_DEPT[d.dept], d)}
+              active={d.dept === chosen.dept}
+              onActive={(on) => {
+                setActive(on ? d.dept : null)
+                if (on) setPick(d.dept)
+              }}
+              highlight={d.dept === depts[0].dept}
+            />
+          ))}
+        </div>
+      </div>
+      <div className="mt-2 rounded-lg bg-surface-2 p-2.5 text-xs" aria-live="polite">
+        <div className="font-medium text-ink">{TH_DEPT[cur.dept]}</div>
+        <div className="text-ink-2">{tipFor('', cur).slice(1).join(' · ')}</div>
+      </div>
+      <p className="mt-5 text-xs font-medium text-ink-2">หัวข้อ Functional ของ{TH_DEPT[chosen.dept]}</p>
+      <CompetencyStack key={chosen.dept} comps={chosen.comps} />
     </div>
   )
 }

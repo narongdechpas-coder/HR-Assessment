@@ -1,7 +1,7 @@
 # HR Assessment (Demo)
 
 แบบประเมินสมรรถนะตนเองตาม Non-Life Insurance Competency Matrix
-Pilot: ฝ่ายรับประกันภัย (D01) และฝ่ายสินไหมทดแทน (D02)
+ครบ 13 ฝ่าย ฝ่ายละ 5 คน (L5–L1) · ข้อคำถามต่างกันตามฝ่าย Level และ Track ตาม Master Matrix
 
 ```bash
 npm install

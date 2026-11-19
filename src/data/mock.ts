@@ -1,8 +1,6 @@
 // ข้อมูลสมมติสำหรับ Demo เท่านั้น — ชื่อ ตำแหน่ง และคะแนนทั้งหมดสร้างขึ้นเอง ไม่ใช่พนักงานจริง
 import { profileFor, type Track } from '../lib/framework'
 
-export type Role = 'employee' | 'hr'
-
 export type Employee = {
   id: string
   name: string
@@ -11,7 +9,7 @@ export type Employee = {
   level: string
   track: Track
   managerId: string | null
-  role: Role
+  hrAdmin?: boolean // เข้า HR Dashboard ได้ (และยังประเมินตัวเองตามปกติ)
 }
 
 export type Rating = { level: number; note: string }
@@ -29,56 +27,59 @@ export type Assessment = {
 
 export const CYCLE = { id: '2026-H2', name: 'รอบประเมิน H2/2026 (Pilot)' }
 
-const e = (
-  id: string, name: string, title: string, dept: string, level: string, track: Track, managerId: string | null,
-): Employee => ({ id, name, title, dept, level, track, managerId, role: 'employee' })
+// โครงสร้างสมมติ: ฝ่ายละ 5 คน (L5 → L4 → L3 → L2, L1) — รหัส E{ฝ่าย 2 หลัก}{ลำดับ 1–5}
+// [ชื่อ, ตำแหน่ง] เรียงจาก L5 ลงไป L1
+const ORG: Record<string, { l4Track?: Track; people: [string, string][] }> = {
+  D01: { people: [['สมชาย วงศ์สวัสดิ์', 'ผู้อำนวยการฝ่ายรับประกันภัย'], ['กมลชนก วัฒนกุล', 'ผู้จัดการ Non-Motor Underwriting'], ['สุภาวดี ทองดี', 'หัวหน้าทีม Property'], ['วรวุฒิ พรหมมา', 'Underwriter อาวุโส (Property)'], ['ชลธิชา นาคสวัสดิ์', 'Underwriter (Property)']] },
+  D02: { people: [['วิชัย อินทรสุวรรณ', 'ผู้อำนวยการฝ่ายสินไหมทดแทน'], ['อรอุมา ศักดิ์ดี', 'ผู้จัดการสินไหมรถยนต์'], ['จิราพร สุขเจริญ', 'หัวหน้าทีมพิจารณาสินไหมรถยนต์'], ['ภานุวัฒน์ แสงทอง', 'เจ้าหน้าที่สินไหมอาวุโส'], ['ปวีณา ทรัพย์มาก', 'เจ้าหน้าที่สินไหม']] },
+  D03: { l4Track: 'Specialist', people: [['ธีรวัฒน์ ปัญญาวงศ์', 'ผู้อำนวยการฝ่ายคณิตศาสตร์ประกันภัย'], ['นภัสสร ศรีประเสริฐ', 'นักคณิตศาสตร์ประกันภัยอาวุโส'], ['กฤษดา มั่นคง', 'หัวหน้าทีม Pricing'], ['ศศิธร บุญประเสริฐ', 'Actuarial Analyst อาวุโส'], ['ภูริทัต ใจเย็น', 'Actuarial Analyst']] },
+  D04: { people: [['ประเสริฐ ชัยมงคล', 'ผู้อำนวยการฝ่ายขาย'], ['อัญชลี รุ่งเรือง', 'ผู้จัดการช่องทางนายหน้า'], ['ณัฐพล ศรีสุข', 'หัวหน้าทีมขายองค์กร'], ['พรทิพย์ คงสมบูรณ์', 'เจ้าหน้าที่ขายอาวุโส'], ['ธนากร แก้วประเสริฐ', 'เจ้าหน้าที่ขาย']] },
+  D05: { people: [['สุนันทา วงศ์ใหญ่', 'ผู้อำนวยการฝ่ายการตลาด'], ['ปิยะนุช ทองมา', 'ผู้จัดการแบรนด์และแคมเปญ'], ['ชยพล อ่อนศรี', 'หัวหน้าทีม Digital Marketing'], ['ณิชา พรหมวงศ์', 'เจ้าหน้าที่การตลาดอาวุโส'], ['กันตพงศ์ สุวรรณรัตน์', 'เจ้าหน้าที่การตลาด']] },
+  D06: { people: [['รัชนี บุญเรือง', 'ผู้อำนวยการฝ่ายบริการลูกค้า'], ['สมศักดิ์ ดีงาม', 'ผู้จัดการ Contact Centre'], ['วิไลวรรณ จันทร์หอม', 'หัวหน้าทีมรับเรื่องร้องเรียน'], ['อนันต์ ทองสุข', 'เจ้าหน้าที่บริการลูกค้าอาวุโส'], ['ปาริชาติ มีชัย', 'เจ้าหน้าที่บริการลูกค้า']] },
+  D07: { people: [['ประยุทธ แสงอรุณ', 'ผู้อำนวยการฝ่ายประกันภัยต่อ'], ['จันทร์เพ็ญ รัตนวงศ์', 'ผู้จัดการ Treaty'], ['ศักดิ์ชัย บุญมี', 'หัวหน้าทีม Facultative'], ['กชกร เพชรรัตน์', 'เจ้าหน้าที่ประกันภัยต่ออาวุโส'], ['ธนวัฒน์ นิลสุวรรณ', 'เจ้าหน้าที่ประกันภัยต่อ']] },
+  D08: { l4Track: 'Specialist', people: [['อนุชา แก้วมณี', 'ผู้อำนวยการฝ่ายบริหารความเสี่ยง'], ['ดวงใจ ศรีทอง', 'ผู้เชี่ยวชาญ ERM อาวุโส'], ['วีรยุทธ เกียรติศักดิ์', 'หัวหน้าทีม Operational Risk'], ['มาลัย สมใจ', 'เจ้าหน้าที่บริหารความเสี่ยงอาวุโส'], ['พงศกร อินทร์แก้ว', 'เจ้าหน้าที่บริหารความเสี่ยง']] },
+  D09: { people: [['นันทนา พึ่งบุญ', 'ผู้อำนวยการฝ่ายกำกับดูแลและกฎหมาย'], ['ชาญวิทย์ ประเสริฐสุข', 'ผู้จัดการฝ่ายกฎหมาย'], ['อรทัย วงศ์ทอง', 'หัวหน้าทีม Compliance'], ['สุรชัย พันธ์ดี', 'นิติกรอาวุโส'], ['เบญจมาศ ศรีวิไล', 'เจ้าหน้าที่ Compliance']] },
+  D10: { people: [['ศุภชัย ทองคำ', 'ผู้อำนวยการฝ่ายการเงินและบัญชี'], ['วรรณา เจริญผล', 'ผู้จัดการบัญชี'], ['ปิยะพงษ์ เจริญสุข', 'หัวหน้าทีมงบประมาณ'], ['สุดารัตน์ ชื่นใจ', 'นักบัญชีอาวุโส'], ['นิติพงษ์ แสงเงิน', 'นักบัญชี']] },
+  D11: { l4Track: 'Specialist', people: [['อภิชาติ ดวงแก้ว', 'ผู้อำนวยการฝ่ายเทคโนโลยี'], ['ณัฐวุฒิ ศรีสุข', 'Enterprise Architect'], ['สิริกร ทองประเสริฐ', 'หัวหน้าทีม Application'], ['ธีรภัทร สมบูรณ์', 'Developer อาวุโส'], ['พิมพ์ชนก รัตนพันธ์', 'Developer']] },
+  D12: { people: [['มาลินี ศรีสวัสดิ์', 'ผู้อำนวยการฝ่ายทรัพยากรบุคคล'], ['ศิริพร ใจดี', 'ผู้จัดการ HR Business Partner'], ['มณีรัตน์ ปัญญาดี', 'HR Business Partner (Learning & Development)'], ['กิตติศักดิ์ มีสุข', 'เจ้าหน้าที่ HR อาวุโส'], ['ณัฐธิดา บุญมา', 'เจ้าหน้าที่ HR']] },
+  D13: { people: [['ธนพล ศรีวงศ์', 'ผู้อำนวยการฝ่ายปฏิบัติการ'], ['สุมาลี แก้วกาญจนา', 'ผู้จัดการงานกรมธรรม์'], ['เอกชัย พรหมสุวรรณ', 'หัวหน้าทีมประมวลผล'], ['วาสนา ทองเนื้อดี', 'เจ้าหน้าที่ปฏิบัติการอาวุโส'], ['จักรพันธ์ สายทอง', 'เจ้าหน้าที่ปฏิบัติการ']] },
+}
+const LEVELS = ['L5', 'L4', 'L3', 'L2', 'L1']
+const HR_ADMIN = 'E1203' // มณีรัตน์: HRBP L&D ใช้ HR Dashboard
 
-export const EMPLOYEES: Employee[] = [
-  // ฝ่ายรับประกันภัย (D01)
-  e('E1001', 'ธนพล ศรีวงศ์', 'ผู้อำนวยการฝ่ายรับประกันภัย', 'D01', 'L5', 'Management', null),
-  e('E1002', 'กมลชนก วัฒนกุล', 'ผู้จัดการ Non-Motor Underwriting', 'D01', 'L4', 'Management', 'E1001'),
-  e('E1003', 'ปิยะพงษ์ เจริญสุข', 'ผู้จัดการอาวุโส Technical Underwriting', 'D01', 'L4', 'Specialist', 'E1001'),
-  e('E1004', 'สุภาวดี ทองดี', 'หัวหน้าทีม Property', 'D01', 'L3', 'Management', 'E1002'),
-  e('E1005', 'อนุชา แก้วมณี', 'หัวหน้าทีม Marine & Engineering', 'D01', 'L3', 'Management', 'E1002'),
-  e('E1006', 'ณัฐธิดา บุญมา', 'Senior Underwriter (Engineering)', 'D01', 'L3', 'Specialist', 'E1003'),
-  e('E1007', 'วรวุฒิ พรหมมา', 'Underwriter อาวุโส (Property)', 'D01', 'L2', 'Specialist', 'E1004'),
-  e('E1008', 'ศิริพร ใจดี', 'Underwriter อาวุโส (Property)', 'D01', 'L2', 'Specialist', 'E1004'),
-  e('E1009', 'ธีรภัทร สมบูรณ์', 'Underwriter อาวุโส (Marine)', 'D01', 'L2', 'Management', 'E1005'),
-  e('E1010', 'ชลธิชา นาคสวัสดิ์', 'Underwriter (Property)', 'D01', 'L1', 'Specialist', 'E1004'),
-  e('E1011', 'กิตติศักดิ์ มีสุข', 'Underwriter (Marine)', 'D01', 'L1', 'Specialist', 'E1005'),
-  e('E1012', 'พิมพ์ชนก รัตนพันธ์', 'Underwriter (Engineering)', 'D01', 'L1', 'Specialist', 'E1005'),
-  // ฝ่ายสินไหมทดแทน (D02)
-  e('E2001', 'วิชัย อินทรสุวรรณ', 'ผู้อำนวยการฝ่ายสินไหมทดแทน', 'D02', 'L5', 'Management', null),
-  e('E2002', 'อรอุมา ศักดิ์ดี', 'ผู้จัดการสินไหมรถยนต์', 'D02', 'L4', 'Management', 'E2001'),
-  e('E2003', 'ประเสริฐ ชัยมงคล', 'ผู้จัดการสินไหม Non-Motor', 'D02', 'L4', 'Management', 'E2001'),
-  e('E2004', 'จิราพร สุขเจริญ', 'หัวหน้าทีมพิจารณาสินไหมรถยนต์', 'D02', 'L3', 'Management', 'E2002'),
-  e('E2005', 'ศุภชัย ทองคำ', 'หัวหน้าทีมสินไหม Property', 'D02', 'L3', 'Management', 'E2003'),
-  e('E2006', 'นันทนา พึ่งบุญ', 'ผู้เชี่ยวชาญตรวจสอบการฉ้อฉล', 'D02', 'L3', 'Specialist', 'E2002'),
-  e('E2007', 'ภานุวัฒน์ แสงทอง', 'เจ้าหน้าที่สินไหมอาวุโส (Motor)', 'D02', 'L2', 'Specialist', 'E2004'),
-  e('E2008', 'สุนิสา วงศ์ใหญ่', 'เจ้าหน้าที่สินไหมอาวุโส (Motor)', 'D02', 'L2', 'Specialist', 'E2004'),
-  e('E2009', 'อภิชาติ ดวงแก้ว', 'เจ้าหน้าที่สินไหมอาวุโส (Property)', 'D02', 'L2', 'Specialist', 'E2005'),
-  e('E2010', 'ปวีณา ทรัพย์มาก', 'เจ้าหน้าที่สินไหม (Motor)', 'D02', 'L1', 'Specialist', 'E2004'),
-  e('E2011', 'ณัฐวุฒิ ศรีสุข', 'เจ้าหน้าที่สินไหม (Motor)', 'D02', 'L1', 'Specialist', 'E2004'),
-  e('E2012', 'รัชนี บุญเรือง', 'เจ้าหน้าที่สินไหม (Property)', 'D02', 'L1', 'Specialist', 'E2005'),
-  // HR (ไม่อยู่ใน Pilot รอบนี้)
-  { ...e('E9001', 'มณีรัตน์ ปัญญาดี', 'HR Business Partner (Learning & Development)', 'D12', 'L3', 'Specialist', null), role: 'hr' },
-]
+export const EMPLOYEES: Employee[] = Object.entries(ORG).flatMap(([dept, o]) => {
+  const p = 'E' + dept.slice(1)
+  return o.people.map(([name, title], i) => {
+    const level = LEVELS[i]
+    const track: Track = level === 'L5' || level === 'L3' ? 'Management' : level === 'L4' ? (o.l4Track ?? 'Management') : 'Specialist'
+    const managerId = i === 0 ? null : i <= 2 ? `${p}0${i}` : `${p}03` // L4→L5, L3→L4, L2/L1→L3
+    const id = `${p}0${i + 1}`
+    return { id, name, title, dept, level, track, managerId, ...(id === HR_ADMIN ? { hrAdmin: true } : {}) }
+  })
+})
+
+/** คนที่มีรูป mockup ใน public/avatars (ที่เหลือแสดงอักษรแรกของชื่อ) */
+export const PHOTOS = new Set([
+  'E0101', 'E0102', 'E0103', 'E0104', 'E0105', 'E0201', 'E0202', 'E0203', 'E0204', 'E0205',
+  'E0301', 'E0401', 'E0501', 'E0502', 'E0601', 'E0701', 'E0801', 'E0901', 'E1001', 'E1101', 'E1102',
+  'E1201', 'E1202', 'E1203', 'E1204', 'E1205', 'E1301',
+])
 
 export const byId = (id: string) => EMPLOYEES.find((x) => x.id === id)
 export const reportsOf = (id: string) => EMPLOYEES.filter((x) => x.managerId === id)
-export const inPilot = (x: Employee) => x.role === 'employee'
+export const inPilot = (_x: Employee) => true
 
 // สถานะตั้งต้นของ Demo: เว้นคนสำคัญไว้ให้ลองกดเอง ที่เหลือมีข้อมูลบางส่วนแล้ว
 const PRESET: Record<string, Status> = {
-  E1010: 'not_started', // ใช้ลองประเมินตนเอง
-  E1007: 'submitted', // รอ E1004 ทบทวน
-  E1008: 'confirmed',
-  E1004: 'not_started',
-  E1001: 'not_started',
-  E2001: 'not_started',
-  E1011: 'confirmed', // ลูกทีมของ E1005 (หัวหน้าที่เห็นด้วยทุกข้อ)
-  E1012: 'confirmed',
-  E1009: 'submitted',
+  E0105: 'not_started', // ชลธิชา: ใช้ลองประเมินตนเอง
+  E0104: 'submitted', // วรวุฒิ: รอสุภาวดี (E0103) ทบทวน
+  E0103: 'not_started',
+  E0101: 'not_started',
+  E0204: 'confirmed', // ลูกทีมของจิราพร (E0203) หัวหน้าที่เห็นด้วยทุกข้อ
+  E0205: 'confirmed',
+  E0604: 'confirmed', // ลูกทีมของวิไลวรรณ (E0603) หัวหน้าที่เห็นด้วยทุกข้อ
+  E0605: 'confirmed',
+  E1203: 'not_started',
 }
 
 function mulberry32(seed: number) {
@@ -94,9 +95,12 @@ function mulberry32(seed: number) {
 const clamp = (n: number) => Math.max(0, Math.min(4, n))
 
 // จุดอ่อนสมมติขององค์กร (ใส่ไว้ให้ Dashboard มีภาพให้ดู): โอกาสที่ข้อนี้จะต่ำกว่าเป้าเพิ่มอีก 1 ระดับ
-const WEAK: Record<string, number> = { CORE06: 0.55, LEAD06: 0.5, UW03: 0.5, CL03: 0.55, CORE04: 0.3, LEAD03: 0.3 }
+const WEAK: Record<string, number> = {
+  CORE06: 0.55, LEAD06: 0.5, CORE04: 0.3, LEAD03: 0.3,
+  UW03: 0.5, CL03: 0.55, AP03: 0.45, CS02: 0.45, IT02: 0.5, FA03: 0.35, SD04: 0.4,
+}
 // หัวหน้าสมมติที่ "เห็นด้วยทุกข้อ" ใช้โชว์ตัวชี้ calibration
-const RUBBER_STAMP = new Set(['E1005', 'E2004'])
+const RUBBER_STAMP = new Set(['E0203', 'E0603'])
 const NOTE_DOWN = 'ยังต้องมีคนช่วยดูในเคสที่ซับซ้อน ยังทำเองไม่ได้ครบทุกขั้น'
 
 /** สร้างคะแนนสมมติ: คนมักให้ตัวเองเท่าเป้าหรือสูงกว่า หัวหน้ามักปรับลงบางข้อ */
@@ -106,7 +110,7 @@ export function seedAssessments(): Record<string, Assessment> {
   for (const emp of EMPLOYEES.filter(inPilot)) {
     const r = rnd()
     const status: Status =
-      PRESET[emp.id] ?? (r < 0.1 ? 'not_started' : r < 0.2 ? 'draft' : r < 0.4 ? 'submitted' : 'confirmed')
+      PRESET[emp.id] ?? (r < 0.12 ? 'not_started' : r < 0.22 ? 'draft' : r < 0.4 ? 'submitted' : 'confirmed')
     const a: Assessment = { employeeId: emp.id, status, self: {}, review: {} }
     if (status !== 'not_started') {
       const items = profileFor(emp.dept, emp.level, emp.track)

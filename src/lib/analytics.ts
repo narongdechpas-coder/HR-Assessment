@@ -199,3 +199,27 @@ export function byCategory(rows: Row[]): CategoryStack[] {
     })
     .filter((c) => c.n > 0)
 }
+
+export type DeptFunctional = {
+  dept: string
+  n: number
+  below1: number
+  below2: number
+  ok: number
+  rate: number
+  comps: CompStack[] // 4 หัวข้อ Functional ของฝ่ายนี้ เรียงจากอัตราต่ำกว่าเป้ามากไปน้อย
+}
+/** Functional แยกตามฝ่าย (แต่ละฝ่ายมี 4 หัวข้อของตัวเอง) */
+export function functionalByDept(rows: Row[]): DeptFunctional[] {
+  const fn = rows.filter((r) => r.item.group === 'functional')
+  const depts = [...new Set(fn.map((r) => r.emp.dept))].sort()
+  return depts
+    .map((dept) => {
+      const comps = byCategory(fn.filter((r) => r.emp.dept === dept))[0]?.comps ?? []
+      const below1 = comps.reduce((s, c) => s + c.below1, 0)
+      const below2 = comps.reduce((s, c) => s + c.below2, 0)
+      const n = comps.reduce((s, c) => s + c.n, 0)
+      return { dept, n, below1, below2, ok: n - below1 - below2, rate: n ? (below1 + below2) / n : 0, comps }
+    })
+    .sort((a, b) => b.rate - a.rate || b.below2 - a.below2)
+}

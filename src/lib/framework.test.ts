@@ -36,10 +36,29 @@ describe('framework from Excel', () => {
   it('mock seed is deterministic and keeps levels in 0..4', () => {
     const a = seedAssessments()
     expect(seedAssessments()).toEqual(a)
-    expect(a.E1010.status).toBe('not_started')
+    expect(a.E0105.status).toBe('not_started')
     for (const x of Object.values(a)) for (const r of [...Object.values(x.self), ...Object.values(x.review)]) {
       expect(r.level).toBeGreaterThanOrEqual(0)
       expect(r.level).toBeLessThanOrEqual(4)
     }
+  })
+})
+
+describe('mock organisation', () => {
+  it('13 departments × 5 people, L5→L1, reporting lines inside the department', () => {
+    const byDept = new Map<string, typeof EMPLOYEES>()
+    for (const e of EMPLOYEES) byDept.set(e.dept, [...(byDept.get(e.dept) ?? []), e])
+    expect(byDept.size).toBe(13)
+    for (const [d, list] of byDept) {
+      expect(list.map((e) => e.level), d).toEqual(['L5', 'L4', 'L3', 'L2', 'L1'])
+      for (const e of list) if (e.managerId) expect(EMPLOYEES.find((m) => m.id === e.managerId)?.dept).toBe(d)
+    }
+    expect(EMPLOYEES.filter((e) => e.hrAdmin).map((e) => e.id)).toEqual(['E1203'])
+  })
+
+  it('questions differ by department and level', () => {
+    const ids = (d: string, l: string, t: 'Management' | 'Specialist') => profileFor(d, l, t).map((x) => x.id)
+    expect(ids('D01', 'L1', 'Specialist')).not.toEqual(ids('D02', 'L1', 'Specialist')) // Functional ต่างฝ่าย
+    expect(ids('D01', 'L1', 'Specialist').length).toBeLessThan(ids('D01', 'L3', 'Management').length) // Leadership เพิ่มตาม Level
   })
 })

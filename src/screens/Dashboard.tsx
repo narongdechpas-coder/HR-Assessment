@@ -1,14 +1,21 @@
 import { Fragment, useMemo, useState } from 'react'
 import { CYCLE, byId } from '../data/mock'
-import { TH_DEPT, TH_GROUP, TH_LEVEL, TH_TRACK } from '../data/th'
-import { buildRows, byCategory, calibration, heatmap, pending, progress, RUBBER_STAMP_THRESHOLD, type Cell } from '../lib/analytics'
+import { DEPT_SHORT, TH_DEPT, TH_GROUP, TH_LEVEL, TH_TRACK } from '../data/th'
+import { departments } from '../lib/framework'
+import { buildRows, byCategory, calibration, functionalByDept, heatmap, pending, progress, RUBBER_STAMP_THRESHOLD, type Cell } from '../lib/analytics'
 import { buildXlsx, saveFile } from '../lib/xlsx'
 import { useStore } from '../store'
 import { Avatar, Button, Card, StatusBadge } from '../components/ui'
-import { CategoryOverview, CompetencyStack, StackLegend } from '../components/StackChart'
+import { CategoryOverview, CompetencyStack, FunctionalByDept, StackLegend } from '../components/StackChart'
 
-const DEPTS = ['D01', 'D02']
-const SHORT: Record<string, string> = { D01: 'Underwriting', D02: 'Claims' }
+const DEPTS = Object.keys(TH_DEPT)
+const SHORT = DEPT_SHORT
+const DEPT_EN = Object.fromEntries(departments.map((d) => [d.id, d.name]))
+// รหัสสั้นสำหรับหัวคอลัมน์ heatmap
+const CODE: Record<string, string> = {
+  D01: 'UW', D02: 'CL', D03: 'ACT', D04: 'SAL', D05: 'MKT', D06: 'CS', D07: 'RI',
+  D08: 'RM', D09: 'LC', D10: 'FIN', D11: 'IT', D12: 'HR', D13: 'OPS',
+}
 
 // sequential ramp (blue) ตามสัดส่วนคนที่ต่ำกว่าเป้า
 const RAMP = ['#cde2fb', '#9ec5f4', '#6da7ec', '#3987e5', '#256abf', '#184f95']
@@ -30,6 +37,15 @@ export function Dashboard() {
   const pend = useMemo(() => pending(all), [all])
   const heat = useMemo(() => heatmap(rows, DEPTS), [rows])
   const cats = useMemo(() => byCategory(rows), [rows])
+  const fnDept = useMemo(() => functionalByDept(rows), [rows])
+  const heatMain = heat.filter((h) => h.item.group !== 'functional')
+  const fnCells: Record<string, Cell | null> = Object.fromEntries(
+    DEPTS.map((d) => {
+      const f = fnDept.find((x) => x.dept === d)
+      return [d, f && f.n ? { below: f.below1 + f.below2, n: f.n } : null]
+    }),
+  )
+  const fnTotal = Object.values(fnCells).reduce<Cell>((t, c) => (c ? { below: t.below + c.below, n: t.n + c.n } : t), { below: 0, n: 0 })
   const calib = useMemo(() => calibration(buildRows(all, false)), [all])
   const people = new Set(rows.map((r) => r.emp.id)).size
 
@@ -44,7 +60,7 @@ export function Dashboard() {
     const data = buildRows(all, true).map((r) => {
       const a = all[r.emp.id]
       return [
-        r.emp.id, r.emp.name, SHORT[r.emp.dept] ?? r.emp.dept, r.emp.title, r.emp.level, r.emp.track, GROUP_EN[r.item.group],
+        r.emp.id, r.emp.name, DEPT_EN[r.emp.dept] ?? r.emp.dept, r.emp.title, r.emp.level, r.emp.track, GROUP_EN[r.item.group],
         r.item.id, r.item.nameEn, r.item.target, r.final, r.gap,
         r.note, '', r.emp.managerId ? byId(r.emp.managerId)?.name : '', '',
         r.confirmed ? 'Confirmed by manager' : 'Self-assessed (pending manager review)',
@@ -72,41 +88,49 @@ export function Dashboard() {
       {/* 1. ความคืบหน้า */}
       <Card>
         <h2 className="font-semibold">ความคืบหน้าการประเมิน</h2>
-        <div className="mt-3 grid gap-4 sm:grid-cols-2">
-          {prog.map((d) => {
-            const segs = [
-              { k: 'confirmed', label: 'หัวหน้ายืนยันแล้ว', color: 'var(--brand)' },
-              { k: 'submitted', label: 'รอหัวหน้าทบทวน', color: '#86b6ef' },
-              { k: 'draft', label: 'กำลังทำ', color: 'var(--warn-ink)' },
-              { k: 'not_started', label: 'ยังไม่เริ่ม', color: 'var(--line)' },
-            ] as const
-            return (
-              <div key={d.dept}>
-                <div className="flex justify-between text-sm">
-                  <span>{TH_DEPT[d.dept]}</span>
-                  <span className="text-ink-2">
-                    ยืนยันแล้ว {d.counts.confirmed}/{d.total} คน
+        {(() => {
+          const segs = [
+            { k: 'confirmed', label: 'หัวหน้ายืนยันแล้ว', color: 'var(--brand)' },
+            { k: 'submitted', label: 'รอหัวหน้าทบทวน', color: '#86b6ef' },
+            { k: 'draft', label: 'กำลังทำ', color: 'var(--warn-ink)' },
+            { k: 'not_started', label: 'ยังไม่เริ่ม', color: 'var(--line)' },
+          ] as const
+          const sum = (k: (typeof segs)[number]['k']) => prog.reduce((t, d) => t + d.counts[k], 0)
+          const total = prog.reduce((t, d) => t + d.total, 0)
+          return (
+            <>
+              <p className="mt-1 text-sm text-ink-2">
+                หัวหน้ายืนยันแล้ว <b className="font-semibold text-ink">{sum('confirmed')}</b>/{total} คน (
+                {Math.round((sum('confirmed') / total) * 100)}%)
+              </p>
+              <div className="mt-2 flex flex-wrap gap-x-3 text-xs text-ink-2">
+                {segs.map((sg) => (
+                  <span key={sg.k} className="flex items-center gap-1">
+                    <span className="inline-block size-2 rounded-full" style={{ background: sg.color }} />
+                    {sg.label} {sum(sg.k)}
                   </span>
-                </div>
-                <div className="mt-1.5 flex h-3 gap-0.5 overflow-hidden rounded-full">
-                  {segs.map((s) =>
-                    d.counts[s.k] ? (
-                      <div key={s.k} title={`${s.label} ${d.counts[s.k]} คน`} style={{ flex: d.counts[s.k], background: s.color }} />
-                    ) : null,
-                  )}
-                </div>
-                <div className="mt-1.5 flex flex-wrap gap-x-3 text-xs text-ink-2">
-                  {segs.map((s) => (
-                    <span key={s.k} className="flex items-center gap-1">
-                      <span className="inline-block size-2 rounded-full" style={{ background: s.color }} />
-                      {s.label} {d.counts[s.k]}
-                    </span>
-                  ))}
-                </div>
+                ))}
               </div>
-            )
-          })}
-        </div>
+              <ul className="mt-3 grid gap-x-6 gap-y-1.5 sm:grid-cols-2">
+                {prog.map((d) => (
+                  <li key={d.dept} className="grid grid-cols-[5.5rem_1fr_2.5rem] items-center gap-2 text-sm" title={TH_DEPT[d.dept]}>
+                    <span className="truncate text-ink-2">{SHORT[d.dept]}</span>
+                    <span className="flex h-2.5 gap-0.5 overflow-hidden rounded-full">
+                      {segs.map((sg) =>
+                        d.counts[sg.k] ? (
+                          <span key={sg.k} title={`${sg.label} ${d.counts[sg.k]} คน`} style={{ flex: d.counts[sg.k], background: sg.color }} />
+                        ) : null,
+                      )}
+                    </span>
+                    <span className="text-right text-xs text-ink-2">
+                      {d.counts.confirmed}/{d.total}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )
+        })()}
         <details className="mt-4">
           <summary className="cursor-pointer text-sm text-brand">ดูรายชื่อที่ยังไม่เสร็จ ({pend.length} คน)</summary>
           <ul className="mt-2 divide-y divide-line">
@@ -167,7 +191,8 @@ export function Dashboard() {
                       </div>
                       {c.comps[0] && c.comps[0].rate > 0 && (
                         <div className="text-ink-2">
-                          สูงสุด: <b className="font-medium text-ink">{c.comps[0].item.name}</b> {Math.round(c.comps[0].rate * 100)}%
+                          สูงสุด: <b className="font-medium text-ink">{c.comps[0].item.name}</b>
+                          {c.comps[0].item.dept && ` (${SHORT[c.comps[0].item.dept]})`} {Math.round(c.comps[0].rate * 100)}%
                         </div>
                       )}
                     </li>
@@ -187,29 +212,29 @@ export function Dashboard() {
             </span>
           </div>
           <p className="text-xs text-ink-3">เรียงจากอัตราคนต่ำกว่าเป้ามากไปน้อย · แตะหรือชี้ที่แท่งเพื่อดูรายละเอียด</p>
-          <CompetencyStack comps={c.comps} showDept={c.group === 'functional'} />
+          {c.group === 'functional' ? <FunctionalByDept depts={fnDept} /> : <CompetencyStack comps={c.comps} />}
         </Card>
       ))}
 
       {/* 3. Heatmap */}
       <Card>
         <h2 className="font-semibold">% คนที่ต่ำกว่าเป้า แยกตามฝ่าย</h2>
-        <p className="text-sm text-ink-2">สีเข้ม = สัดส่วนคนที่ต่ำกว่าเป้ามาก · ช่องว่าง = competency นี้ไม่ใช้กับฝ่ายนั้น</p>
-        <div className="mt-3 overflow-x-auto">
-          <table className="w-full table-fixed border-separate border-spacing-0.5 text-sm">
+        <p className="text-sm text-ink-2">สีเข้ม = สัดส่วนต่ำกว่าเป้ามาก · ช่องว่าง = ไม่มีคนประเมินข้อนี้ · Functional รวม 4 หัวข้อของแต่ละฝ่าย</p>
+        <div className="relative mt-3 overflow-x-auto [contain:inline-size]">
+          <table className="w-full min-w-[720px] table-fixed border-separate border-spacing-0.5 text-sm">
             <thead>
               <tr className="text-xs text-ink-3">
-                <th className="text-left font-normal">Competency</th>
+                <th className="sticky left-0 w-40 bg-surface text-left font-normal">Competency</th>
                 {DEPTS.map((d) => (
-                  <th key={d} className="w-16 font-normal sm:w-24">{SHORT[d]}</th>
+                  <th key={d} className="font-normal" title={TH_DEPT[d]}>{CODE[d]}</th>
                 ))}
-                <th className="w-14 font-normal sm:w-24">รวม</th>
+                <th className="w-12 font-normal">รวม</th>
               </tr>
             </thead>
             <tbody>
-              {heat.map((h, i) => (
+              {heatMain.map((h, i) => (
                 <Fragment key={h.item.id}>
-                  {(i === 0 || heat[i - 1].item.group !== h.item.group) && (
+                  {(i === 0 || heatMain[i - 1].item.group !== h.item.group) && (
                     <tr>
                       <td colSpan={DEPTS.length + 2} className="pt-3 pb-1 text-xs font-medium text-ink-2">
                         {TH_GROUP[h.item.group]}
@@ -217,25 +242,50 @@ export function Dashboard() {
                     </tr>
                   )}
                   <tr>
-                    <td className="py-1 pr-2 text-xs sm:text-sm">{h.item.name}</td>
+                    <td className="sticky left-0 bg-surface py-1 pr-2 text-xs">{h.item.name}</td>
                     {[...DEPTS.map((d) => h.cells[d]), h.total].map((c, j) => (
                       <td
                         key={j}
                         className="rounded text-center text-xs font-medium"
                         style={cellStyle(c)}
-                        title={c ? `ต่ำกว่าเป้า ${c.below} จาก ${c.n} คน` : 'ไม่ใช้กับฝ่ายนี้'}
+                        title={c ? `ต่ำกว่าเป้า ${c.below} จาก ${c.n} คน` : 'ไม่มีคนประเมินข้อนี้'}
                       >
                         {c ? `${pct(c)}%` : ''}
                         {c && <span className="sr-only"> ({c.below}/{c.n})</span>}
                       </td>
                     ))}
                   </tr>
+                  {h.item.group === 'core' && heatMain[i + 1]?.item.group !== 'core' && (
+                    <>
+                      <tr>
+                        <td colSpan={DEPTS.length + 2} className="pt-3 pb-1 text-xs font-medium text-ink-2">
+                          {TH_GROUP.functional}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="sticky left-0 bg-surface py-1 pr-2 text-xs">Functional ของฝ่าย (4 หัวข้อ)</td>
+                        {[...DEPTS.map((d) => fnCells[d]), fnTotal.n ? fnTotal : null].map((c, j) => (
+                          <td
+                            key={j}
+                            className="rounded text-center text-xs font-medium"
+                            style={cellStyle(c)}
+                            title={c ? `ต่ำกว่าเป้า ${c.below} จาก ${c.n} ข้อ-คน` : 'ไม่มีข้อมูล'}
+                          >
+                            {c ? `${pct(c)}%` : ''}
+                          </td>
+                        ))}
+                      </tr>
+                    </>
+                  )}
                 </Fragment>
               ))}
             </tbody>
           </table>
         </div>
-        <div className="mt-3 flex items-center gap-1 text-xs text-ink-3">
+        <p className="mt-3 text-xs text-ink-3">
+          {DEPTS.map((d) => `${CODE[d]} = ${SHORT[d]}`).join(' · ')}
+        </p>
+        <div className="mt-2 flex items-center gap-1 text-xs text-ink-3">
           0%
           {RAMP.map((c) => (
             <span key={c} className="inline-block h-2.5 w-6" style={{ background: c }} />

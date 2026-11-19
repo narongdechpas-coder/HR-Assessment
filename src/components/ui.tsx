@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
-import type { Status } from '../data/mock'
+import { PHOTOS, type Status } from '../data/mock'
 
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
   return <div className={`rounded-xl border border-line bg-surface p-5 ${className}`}>{children}</div>
@@ -42,13 +42,13 @@ export function Avatar({
   const [failed, setFailed] = useState(false)
   const shape = square ? 'rounded-2xl shadow-md' : 'rounded-full'
   const style = { width: size, height: size }
-  if (failed)
+  if (failed || !PHOTOS.has(id))
     return (
       <span
         style={{ ...style, fontSize: size * 0.4 }}
         className={`inline-flex shrink-0 items-center justify-center ${shape} bg-brand-soft font-medium text-brand ${className}`}
       >
-        {name.charAt(0)}
+        {initial(name)}
       </span>
     )
   return (
@@ -63,4 +63,10 @@ export function Avatar({
       className={`shrink-0 ${shape} bg-surface-2 object-cover ${className}`}
     />
   )
+}
+
+/** อักษรแรกของชื่อไทย (ข้ามสระหน้า เ แ โ ใ ไ) */
+function initial(name: string) {
+  const c = [...name].find((ch) => !'เแโใไ'.includes(ch))
+  return c ?? name.charAt(0)
 }

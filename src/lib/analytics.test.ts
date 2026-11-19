@@ -18,9 +18,9 @@ describe('HR analytics', () => {
 
   it('progress counts every pilot employee exactly once', () => {
     const p = progress(all)
-    expect(p.reduce((s, d) => s + d.total, 0)).toBe(24)
+    expect(p.reduce((s, d) => s + d.total, 0)).toBe(65)
     for (const d of p) expect(Object.values(d.counts).reduce((a, b) => a + b, 0)).toBe(d.total)
-    expect(pending(all).length).toBe(24 - p.reduce((s, d) => s + d.counts.confirmed, 0))
+    expect(pending(all).length).toBe(65 - p.reduce((s, d) => s + d.counts.confirmed, 0))
   })
 
   it('heatmap totals equal the sum of department cells; functional cells only in own dept', () => {
@@ -43,7 +43,7 @@ describe('HR analytics', () => {
   it('flags the rubber-stamp managers seeded in mock data', () => {
     const c = calibration(buildRows(all, false))
     const flagged = c.managers.filter((m) => m.flag).map((m) => m.manager.id).sort()
-    expect(flagged).toEqual(['E1005', 'E2004'])
+    expect(flagged).toEqual(['E0203', 'E0603'])
     expect(c.selfMinusReview).toBeGreaterThan(0) // คนให้ตัวเองสูงกว่าหัวหน้า
   })
 

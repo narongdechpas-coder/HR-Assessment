@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { byId } from './data/mock'
 import { useStore } from './store'
 import { Avatar, DemoBanner } from './components/ui'
@@ -7,24 +7,52 @@ import { Home } from './screens/Home'
 import { AssessmentWizard } from './screens/Assessment'
 import { ReviewScreen } from './screens/Review'
 import { Dashboard } from './screens/Dashboard'
+import { FrameworkBrowser } from './screens/Framework'
+
+type View = 'home' | 'assess' | 'review' | 'dashboard' | 'framework'
 
 export default function App() {
   const userId = useStore((s) => s.userId)
   const logout = useStore((s) => s.logout)
-  const [view, setView] = useState<'home' | 'assess' | 'review'>('home')
+  const [view, setView] = useState<View>('home')
   const [reviewId, setReviewId] = useState<string | null>(null)
   const reviewee = reviewId ? byId(reviewId) : undefined
   const emp = userId ? byId(userId) : undefined
+  const go = (v: View) => {
+    setView(v)
+    window.scrollTo(0, 0)
+  }
+  // พอเปลี่ยนผู้ใช้ ให้ไปหน้าที่เหมาะกับคนนั้น (HR ไป Dashboard ก่อน)
+  const lastUser = useRef(userId)
+  useEffect(() => {
+    if (userId === lastUser.current) return
+    lastUser.current = userId
+    if (userId) {
+      setView(byId(userId)?.hrAdmin ? 'dashboard' : 'home')
+      window.scrollTo(0, 0)
+    }
+  }, [userId])
+
+  const tab = (v: View, label: string) => (
+    <button
+      onClick={() => go(v)}
+      className={`rounded-lg px-2.5 py-1 ${view === v ? 'bg-brand-soft font-medium text-brand' : 'text-ink-2 hover:bg-surface-2'}`}
+    >
+      {label}
+    </button>
+  )
 
   return (
     <div className="min-h-screen">
       <DemoBanner />
       {emp && (
         <header className="border-b border-line bg-surface">
-          <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
-            <button className="font-semibold" onClick={() => setView('home')}>
-              ประเมินสมรรถนะ
-            </button>
+          <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-2 px-4 py-3">
+            <nav className="flex flex-wrap items-center gap-1 text-sm">
+              {tab('home', 'ของฉัน')}
+              {emp.hrAdmin && tab('dashboard', 'HR Dashboard')}
+              {tab('framework', 'ข้อคำถาม')}
+            </nav>
             <div className="flex items-center gap-3 text-sm">
               <Avatar id={emp.id} name={emp.name} size={28} />
               <span className="hidden text-ink-2 sm:inline">{emp.name}</span>
@@ -42,25 +70,24 @@ export default function App() {
         </header>
       )}
 
-      {!emp && <Login />}
-      {emp?.role === 'hr' && <Dashboard />}
-      {emp?.role === 'employee' && view === 'home' && (
+      {!emp && view !== 'framework' && <Login onBrowse={() => go('framework')} />}
+      {view === 'framework' && <FrameworkBrowser onBack={() => go('home')} />}
+      {emp && view === 'dashboard' && emp.hrAdmin && <Dashboard />}
+      {emp && view === 'home' && (
         <Home
           emp={emp}
-          onStart={() => setView('assess')}
+          onStart={() => go('assess')}
           onReview={(id) => {
             setReviewId(id)
-            setView('review')
-            window.scrollTo(0, 0)
+            go('review')
           }}
         />
       )}
-      {emp?.role === 'employee' && view === 'review' && reviewee && reviewee.managerId === emp.id && (
-        <ReviewScreen emp={reviewee} onBack={() => setView('home')} />
+      {emp && view === 'review' && reviewee && reviewee.managerId === emp.id && (
+        <ReviewScreen emp={reviewee} onBack={() => go('home')} />
       )}
-      {emp?.role === 'employee' && view === 'assess' && (
-        <AssessmentWizard emp={emp} onDone={() => setView('home')} onExit={() => setView('home')} />
-      )}
+      {emp && view === 'assess' && <AssessmentWizard emp={emp} onDone={() => go('home')} onExit={() => go('home')} />}
     </div>
   )
 }
+
