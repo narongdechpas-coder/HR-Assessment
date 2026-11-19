@@ -1,0 +1,102 @@
+@import 'tailwindcss';
+
+/* โทนสีเป็น token เดียว เปลี่ยนตรงนี้ที่เดียวทั้ง App */
+:root {
+  color-scheme: light;
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --surface-2: #f0efec;
+  --line: #e2e1dc;
+  --ink: #16181d;
+  --ink-2: #52514e;
+  --ink-3: #7a7974;
+  --brand: #1c5cab;
+  --brand-soft: #e3eefb;
+  --on-brand: #ffffff;
+  --series-self: #2a78d6;
+  --series-review: #eb6834;
+  --target: #16181d;
+  --good: #0a7d0a;
+  --good-soft: #e5f4e5;
+  --critical: #c23434;
+  --critical-soft: #fbe9e9;
+  --warn-soft: #fdf3dc;
+  --warn-ink: #8a5a00;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --bg: #111111;
+    --surface: #1a1a19;
+    --surface-2: #262624;
+    --line: #383835;
+    --ink: #f0efec;
+    --ink-2: #c3c2b7;
+    --ink-3: #95948c;
+    --brand: #5598e7;
+    --brand-soft: #1b2a3d;
+    --on-brand: #0b0b0b;
+    --series-self: #3987e5;
+    --series-review: #d95926;
+    --target: #f0efec;
+    --good: #2fbf2f;
+    --good-soft: #15291a;
+    --critical: #e66767;
+    --critical-soft: #331b1b;
+    --warn-soft: #33290f;
+    --warn-ink: #f2c35c;
+  }
+}
+
+:root[data-theme='dark'] {
+    color-scheme: dark;
+    --bg: #111111;
+    --surface: #1a1a19;
+    --surface-2: #262624;
+    --line: #383835;
+    --ink: #f0efec;
+    --ink-2: #c3c2b7;
+    --ink-3: #95948c;
+    --brand: #5598e7;
+    --brand-soft: #1b2a3d;
+    --on-brand: #0b0b0b;
+    --series-self: #3987e5;
+    --series-review: #d95926;
+    --target: #f0efec;
+    --good: #2fbf2f;
+    --good-soft: #15291a;
+    --critical: #e66767;
+    --critical-soft: #331b1b;
+    --warn-soft: #33290f;
+    --warn-ink: #f2c35c;
+  }
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-brand: var(--brand);
+  --color-brand-soft: var(--brand-soft);
+  --color-on-brand: var(--on-brand);
+  --color-good: var(--good);
+  --color-good-soft: var(--good-soft);
+  --color-critical: var(--critical);
+  --color-critical-soft: var(--critical-soft);
+  --color-warn-soft: var(--warn-soft);
+  --color-warn-ink: var(--warn-ink);
+  --font-sans: 'Prompt', system-ui, sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+}
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
