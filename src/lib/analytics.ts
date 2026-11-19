@@ -1,6 +1,6 @@
 // คำนวณตัวเลขสำหรับ HR Dashboard จากผลประเมินทั้งหมด
 import { EMPLOYEES, byId, inPilot, type Assessment, type Employee, type Status } from '../data/mock'
-import { profileFor, type ProfileItem } from './framework'
+import { profileFor, type Group, type ProfileItem } from './framework'
 
 export type Row = {
   emp: Employee
@@ -138,4 +138,64 @@ export function calibration(rows: Row[]): { managers: Calib[]; selfMinusReview: 
     .sort((a, b) => b.agreeRate - a.agreeRate)
   const selfMinusReview = confirmed.length ? confirmed.reduce((s, r) => s + (r.self - r.review!), 0) / confirmed.length : 0
   return { managers, selfMinusReview, n: confirmed.length }
+}
+
+export type CompStack = {
+  item: ProfileItem
+  n: number
+  below1: number // ขาด 1 ระดับ
+  below2: number // ขาด 2 ระดับขึ้นไป
+  ok: number // ตรงหรือสูงกว่าเป้า
+  rate: number // สัดส่วนที่ต่ำกว่าเป้า
+  levels: string[]
+}
+export type CategoryStack = {
+  group: Group
+  n: number
+  below1: number
+  below2: number
+  ok: number
+  rate: number
+  shareOfGaps: number // หมวดนี้คิดเป็นกี่ % ของ gap ทั้งหมด
+  comps: CompStack[] // เรียงจากอัตราต่ำกว่าเป้ามากไปน้อย
+}
+
+/** สรุปแยกหมวด Core / Functional / Leadership และแยกรายหัวข้อในหมวด */
+export function byCategory(rows: Row[]): CategoryStack[] {
+  const totalBelow = rows.filter((r) => r.gap < 0).length
+  const groups: Group[] = ['core', 'functional', 'leadership']
+  return groups
+    .map((g) => {
+      const gr = rows.filter((r) => r.item.group === g)
+      const ids = [...new Set(gr.map((r) => r.item.id))]
+      const comps = ids
+        .map((id) => {
+          const rs = gr.filter((r) => r.item.id === id)
+          const below1 = rs.filter((r) => r.gap === -1).length
+          const below2 = rs.filter((r) => r.gap <= -2).length
+          return {
+            item: rs[0].item,
+            n: rs.length,
+            below1,
+            below2,
+            ok: rs.length - below1 - below2,
+            rate: (below1 + below2) / rs.length,
+            levels: [...new Set(rs.filter((r) => r.gap < 0).map((r) => r.emp.level))].sort(),
+          }
+        })
+        .sort((a, b) => b.rate - a.rate || b.below2 - a.below2 || b.n - a.n)
+      const below1 = comps.reduce((s, c) => s + c.below1, 0)
+      const below2 = comps.reduce((s, c) => s + c.below2, 0)
+      return {
+        group: g,
+        n: gr.length,
+        below1,
+        below2,
+        ok: gr.length - below1 - below2,
+        rate: gr.length ? (below1 + below2) / gr.length : 0,
+        shareOfGaps: totalBelow ? (below1 + below2) / totalBelow : 0,
+        comps,
+      }
+    })
+    .filter((c) => c.n > 0)
 }

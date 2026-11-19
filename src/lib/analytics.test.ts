@@ -53,3 +53,19 @@ describe('HR analytics', () => {
     writeFileSync(process.env.XLSX_OUT ?? '/dev/null', f)
   })
 })
+
+describe('byCategory', () => {
+  it('segments add up, shares sum to 100%, comps sorted by rate', async () => {
+    const { byCategory } = await import('./analytics')
+    const rows = buildRows(all, false)
+    const cats = byCategory(rows)
+    expect(cats.map((c) => c.group)).toEqual(['core', 'functional', 'leadership'])
+    expect(cats.reduce((s, c) => s + c.shareOfGaps, 0)).toBeCloseTo(1)
+    expect(cats.reduce((s, c) => s + c.n, 0)).toBe(rows.length)
+    for (const c of cats) {
+      expect(c.below1 + c.below2 + c.ok).toBe(c.n)
+      for (const x of c.comps) expect(x.below1 + x.below2 + x.ok).toBe(x.n)
+      for (let i = 1; i < c.comps.length; i++) expect(c.comps[i - 1].rate).toBeGreaterThanOrEqual(c.comps[i].rate)
+    }
+  })
+})

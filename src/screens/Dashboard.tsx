@@ -1,10 +1,11 @@
 import { Fragment, useMemo, useState } from 'react'
 import { CYCLE, byId } from '../data/mock'
 import { TH_DEPT, TH_GROUP, TH_LEVEL, TH_TRACK } from '../data/th'
-import { buildRows, calibration, heatmap, pending, priorities, progress, RUBBER_STAMP_THRESHOLD, type Cell } from '../lib/analytics'
+import { buildRows, byCategory, calibration, heatmap, pending, progress, RUBBER_STAMP_THRESHOLD, type Cell } from '../lib/analytics'
 import { buildXlsx, saveFile } from '../lib/xlsx'
 import { useStore } from '../store'
 import { Avatar, Button, Card, StatusBadge } from '../components/ui'
+import { CategoryOverview, CompetencyStack, StackLegend } from '../components/StackChart'
 
 const DEPTS = ['D01', 'D02']
 const SHORT: Record<string, string> = { D01: 'Underwriting', D02: 'Claims' }
@@ -28,10 +29,9 @@ export function Dashboard() {
   const prog = useMemo(() => progress(all), [all])
   const pend = useMemo(() => pending(all), [all])
   const heat = useMemo(() => heatmap(rows, DEPTS), [rows])
-  const prio = useMemo(() => priorities(rows), [rows])
+  const cats = useMemo(() => byCategory(rows), [rows])
   const calib = useMemo(() => calibration(buildRows(all, false)), [all])
   const people = new Set(rows.map((r) => r.emp.id)).size
-  const maxBelow = Math.max(1, ...prio.map((p) => p.below))
 
   async function doExport() {
     const header = [
@@ -143,37 +143,53 @@ export function Dashboard() {
         </p>
       )}
 
-      {/* 2. ลำดับ Training */}
+      {/* 2. Training แยกหมวด */}
       <Card>
-        <h2 className="font-semibold">Training ที่ควรเปิดก่อน</h2>
-        <p className="text-sm text-ink-2">เรียงตามจำนวนคนที่ต่ำกว่าเป้า ถ้าเท่ากันดูว่าขาดเฉลี่ยกี่ระดับ</p>
-        {prio.length === 0 && <p className="mt-4 text-sm text-ink-3">ยังไม่มีข้อมูล</p>}
-        <ol className="mt-4 space-y-3">
-          {prio.slice(0, 10).map((p, i) => (
-            <li key={p.item.id} className="grid grid-cols-[1.5rem_1fr] gap-x-2">
-              <span className="text-sm text-ink-3">{i + 1}.</span>
-              <div>
-                <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-                  <span className="text-sm font-medium">
-                    {p.item.name} <span className="font-normal text-ink-3">{p.item.nameEn}</span>
-                  </span>
-                  <span className="text-sm">
-                    <b className="font-semibold">{p.below}</b>
-                    <span className="text-ink-2">/{p.n} คนต่ำกว่าเป้า</span>
-                  </span>
-                </div>
-                <div className="mt-1 h-2 rounded-r bg-surface-2">
-                  <div className="h-2 rounded-r" style={{ width: `${(p.below / maxBelow) * 100}%`, background: 'var(--series-self)' }} />
-                </div>
-                <div className="mt-1 text-xs text-ink-2">
-                  ขาดเฉลี่ย {p.avgShortfall.toFixed(1)} ระดับ · {TH_GROUP[p.item.group].split(' — ')[0]} · ฝ่าย{' '}
-                  {p.depts.map((d) => SHORT[d]).join(', ')} · กลุ่มเป้าหมาย {p.levels.join(', ')}
-                </div>
-              </div>
-            </li>
-          ))}
-        </ol>
+        <h2 className="font-semibold">Training แยกตามหมวด</h2>
+        <p className="text-sm text-ink-2">หมวดไหนมี gap มากที่สุด และในหมวดนั้นเรื่องไหนมีอัตราคนต่ำกว่าเป้าสูงสุด</p>
+        {cats.length === 0 ? (
+          <p className="mt-4 text-sm text-ink-3">ยังไม่มีข้อมูล</p>
+        ) : (
+          <>
+            <div className="mt-3">
+              <StackLegend />
+            </div>
+            <div className="mt-2 grid gap-4 sm:grid-cols-[1fr_1.4fr] sm:items-end">
+              <CategoryOverview cats={cats} />
+              <ul className="space-y-2 text-sm">
+                {[...cats]
+                  .sort((a, b) => b.shareOfGaps - a.shareOfGaps)
+                  .map((c) => (
+                    <li key={c.group} className="rounded-lg bg-surface-2 p-3">
+                      <div className="font-medium">{TH_GROUP[c.group]}</div>
+                      <div className="text-ink-2">
+                        {Math.round(c.shareOfGaps * 100)}% ของ gap ทั้งหมด · อัตราต่ำกว่าเป้า {Math.round(c.rate * 100)}%
+                      </div>
+                      {c.comps[0] && c.comps[0].rate > 0 && (
+                        <div className="text-ink-2">
+                          สูงสุด: <b className="font-medium text-ink">{c.comps[0].item.name}</b> {Math.round(c.comps[0].rate * 100)}%
+                        </div>
+                      )}
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          </>
+        )}
       </Card>
+
+      {cats.map((c) => (
+        <Card key={c.group}>
+          <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+            <h2 className="font-semibold">{TH_GROUP[c.group]}</h2>
+            <span className="text-sm text-ink-2">
+              อัตราต่ำกว่าเป้า {Math.round(c.rate * 100)}% · {Math.round(c.shareOfGaps * 100)}% ของ gap ทั้งหมด
+            </span>
+          </div>
+          <p className="text-xs text-ink-3">เรียงจากอัตราคนต่ำกว่าเป้ามากไปน้อย · แตะหรือชี้ที่แท่งเพื่อดูรายละเอียด</p>
+          <CompetencyStack comps={c.comps} showDept={c.group === 'functional'} />
+        </Card>
+      ))}
 
       {/* 3. Heatmap */}
       <Card>

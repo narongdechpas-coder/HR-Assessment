@@ -16,6 +16,7 @@ type RawCompetency = {
 export type ProfileItem = {
   id: string
   group: Group
+  dept: string | null // ฝ่ายเจ้าของ (เฉพาะ Functional)
   nameEn: string
   name: string
   definition: string
@@ -43,6 +44,7 @@ export function profileFor(dept: string, level: string, track: Track): ProfileIt
       return {
         id: c.id,
         group: c.group,
+        dept: c.dept,
         nameEn: c.name,
         name: th?.name ?? c.name,
         definition: th?.definition ?? c.definition,
