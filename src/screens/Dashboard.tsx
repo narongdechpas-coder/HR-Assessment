@@ -17,14 +17,19 @@ const CODE: Record<string, string> = {
   D08: 'RM', D09: 'LC', D10: 'FIN', D11: 'IT', D12: 'HR', D13: 'OPS',
 }
 
-// sequential ramp (blue) ตามสัดส่วนคนที่ต่ำกว่าเป้า
-const RAMP = ['#cde2fb', '#9ec5f4', '#6da7ec', '#3987e5', '#256abf', '#184f95']
+// สเกลเขียว-เหลือง-ส้ม-แดง ตาม % คนที่ต่ำกว่าเป้า (ช่วงตายตัว ไล่ความเข้มอ่อน→เข้ม เผื่อคนตาบอดสี)
+const BANDS = [
+  { max: 25, label: 'ต่ำกว่า 25%', bg: '#dff3df', fg: '#0a5c0a' },
+  { max: 50, label: '25–49%', bg: '#f2cc55', fg: '#5c4300' },
+  { max: 75, label: '50–74%', bg: '#ee9050', fg: '#5a2100' },
+  { max: Infinity, label: '75% ขึ้นไป', bg: '#c23434', fg: '#ffffff' },
+]
 function cellStyle(c: Cell | null) {
-  if (!c) return { background: 'transparent' }
-  if (c.below === 0) return { background: 'var(--surface-2)', color: 'var(--ink-3)' }
-  const i = Math.min(RAMP.length - 1, Math.floor((c.below / c.n) * RAMP.length))
-  return { background: RAMP[i], color: i >= 3 ? '#ffffff' : '#0d366b' }
+  if (!c) return { background: 'transparent', color: 'var(--ink-3)' }
+  const b = BANDS.find((x) => (c.below / c.n) * 100 < x.max)!
+  return { background: b.bg, color: b.fg }
 }
+const deptTh = (d: string) => TH_DEPT[d].replace(/^ฝ่าย/, '').replace(/ \(.*\)$/, '')
 const pct = (c: Cell) => Math.round((c.below / c.n) * 100)
 
 export function Dashboard() {
@@ -219,7 +224,7 @@ export function Dashboard() {
       {/* 3. Heatmap */}
       <Card>
         <h2 className="font-semibold">% คนที่ต่ำกว่าเป้า แยกตามฝ่าย</h2>
-        <p className="text-sm text-ink-2">สีเข้ม = สัดส่วนต่ำกว่าเป้ามาก · ช่องว่าง = ไม่มีคนประเมินข้อนี้ · Functional รวม 4 หัวข้อของแต่ละฝ่าย</p>
+        <p className="text-sm text-ink-2">เขียว = ส่วนใหญ่ถึงเป้า · แดง = ส่วนใหญ่ต่ำกว่าเป้า · Functional รวม 4 หัวข้อของแต่ละฝ่าย</p>
         <div className="relative mt-3 overflow-x-auto [contain:inline-size]">
           <table className="w-full min-w-[720px] table-fixed border-separate border-spacing-0.5 text-sm">
             <thead>
@@ -250,7 +255,7 @@ export function Dashboard() {
                         style={cellStyle(c)}
                         title={c ? `ต่ำกว่าเป้า ${c.below} จาก ${c.n} คน` : 'ไม่มีคนประเมินข้อนี้'}
                       >
-                        {c ? `${pct(c)}%` : ''}
+                        {c ? `${pct(c)}%` : '–'}
                         {c && <span className="sr-only"> ({c.below}/{c.n})</span>}
                       </td>
                     ))}
@@ -271,7 +276,7 @@ export function Dashboard() {
                             style={cellStyle(c)}
                             title={c ? `ต่ำกว่าเป้า ${c.below} จาก ${c.n} ข้อ-คน` : 'ไม่มีข้อมูล'}
                           >
-                            {c ? `${pct(c)}%` : ''}
+                            {c ? `${pct(c)}%` : '–'}
                           </td>
                         ))}
                       </tr>
@@ -283,14 +288,16 @@ export function Dashboard() {
           </table>
         </div>
         <p className="mt-3 text-xs text-ink-3">
-          {DEPTS.map((d) => `${CODE[d]} = ${SHORT[d]}`).join(' · ')}
+          {DEPTS.map((d) => `${CODE[d]} ${deptTh(d)}`).join(' · ')} · – = ยังไม่มีคนที่หัวหน้ายืนยันผล
         </p>
-        <div className="mt-2 flex items-center gap-1 text-xs text-ink-3">
-          0%
-          {RAMP.map((c) => (
-            <span key={c} className="inline-block h-2.5 w-6" style={{ background: c }} />
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-2">
+          <span className="text-ink-3">% คนที่ต่ำกว่าเป้า:</span>
+          {BANDS.map((b) => (
+            <span key={b.label} className="flex items-center gap-1">
+              <span className="inline-block h-3 w-5 rounded-sm" style={{ background: b.bg }} />
+              {b.label}
+            </span>
           ))}
-          100%
         </div>
       </Card>
 
