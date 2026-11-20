@@ -18,9 +18,9 @@ describe('HR analytics', () => {
 
   it('progress counts every pilot employee exactly once', () => {
     const p = progress(all)
-    expect(p.reduce((s, d) => s + d.total, 0)).toBe(65)
+    expect(p.reduce((s, d) => s + d.total, 0)).toBe(70)
     for (const d of p) expect(Object.values(d.counts).reduce((a, b) => a + b, 0)).toBe(d.total)
-    expect(pending(all).length).toBe(65 - p.reduce((s, d) => s + d.counts.confirmed, 0))
+    expect(pending(all).length).toBe(70 - p.reduce((s, d) => s + d.counts.confirmed, 0))
   })
 
   it('heatmap totals equal the sum of department cells; functional cells only in own dept', () => {

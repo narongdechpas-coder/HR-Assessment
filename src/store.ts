@@ -91,6 +91,6 @@ export const useStore = create<State>()(
         }),
       resetDemo: () => set({ assessments: seedAssessments(), userId: null }),
     }),
-    { name: 'hr-assessment-demo-v3', storage: safeStorage },
+    { name: 'hr-assessment-demo-v4', storage: safeStorage },
   ),
 )

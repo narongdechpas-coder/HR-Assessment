@@ -9,6 +9,7 @@ type RawCompetency = {
   group: Group
   name: string
   dept: string | null
+  draft?: boolean
   definition: string
   behaviours: string[]
 }
@@ -17,6 +18,7 @@ export type ProfileItem = {
   id: string
   group: Group
   dept: string | null // ฝ่ายเจ้าของ (เฉพาะ Functional)
+  draft: boolean // ร่างจาก source/extensions.json ยังไม่อยู่ใน Excel master
   nameEn: string
   name: string
   definition: string
@@ -45,6 +47,7 @@ export function profileFor(dept: string, level: string, track: Track): ProfileIt
         id: c.id,
         group: c.group,
         dept: c.dept,
+        draft: !!c.draft,
         nameEn: c.name,
         name: th?.name ?? c.name,
         definition: th?.definition ?? c.definition,

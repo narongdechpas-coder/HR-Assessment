@@ -1,0 +1,58 @@
+{
+  "_note": "ร่างเพิ่มเติมจาก Excel master (ยังไม่ผ่านการยืนยัน) — tools/build_framework.py รวมไฟล์นี้เข้า framework.json และติดป้าย draft ใน App. ระดับเป้าหมาย Core/Leadership คัดลอกจาก Excel (ทุกฝ่ายใช้ชุดเดียวกัน) ส่วน Functional ใช้รูปแบบเดียวกับฝ่ายอื่น: L1=2, L2-L3=3, L4-L6=4",
+  "departments": [
+    {
+      "id": "D14",
+      "name": "Corporate Strategy & Planning",
+      "scope": "Corporate strategy, business planning, forecasting, performance management and executive reporting",
+      "functionalTargets": { "L1": 2, "L2": 3, "L3": 3, "L4": 4, "L5": 4, "L6": 4 },
+      "copyCoreLeadershipFrom": "D01",
+      "competencies": [
+        {
+          "id": "SP01",
+          "name": "Strategic Analysis & Market Intelligence",
+          "definition": "Analyse market, competitor, regulatory and macro trends to inform strategic choices.",
+          "behaviours": [
+            "Collects market and competitor data from defined sources and keeps trackers up to date.",
+            "Analyses market share, growth and competitor moves and summarises implications for the company.",
+            "Frames strategic questions, combines multiple sources and recommends options with clear trade-offs.",
+            "Anticipates industry shifts and shapes the strategic agenda of senior management."
+          ]
+        },
+        {
+          "id": "SP02",
+          "name": "Business Planning & Target Setting",
+          "definition": "Translate strategy into business plans, targets and resource allocation aligned with capital and risk appetite.",
+          "behaviours": [
+            "Prepares planning templates and consolidates inputs from departments accurately.",
+            "Builds department and company plans, checks consistency of targets and challenges unrealistic inputs.",
+            "Leads the annual planning cycle and aligns targets with capital, risk appetite and resource constraints.",
+            "Sets the planning framework and negotiates enterprise targets with executives and shareholders."
+          ]
+        },
+        {
+          "id": "SP03",
+          "name": "Financial Forecasting & Scenario Modelling",
+          "definition": "Build forecasts and scenarios for premium, loss ratio, combined ratio, capital and profit.",
+          "behaviours": [
+            "Updates forecast models with actual results following defined steps.",
+            "Builds forecasts for premium, loss ratio and expenses and explains key assumptions.",
+            "Designs scenario and sensitivity analyses and quantifies the impact on profit and capital.",
+            "Owns the forecasting methodology and advises executives on strategic and capital decisions."
+          ]
+        },
+        {
+          "id": "SP04",
+          "name": "Performance Management & Executive Reporting",
+          "definition": "Track strategic KPIs, analyse variances and present insights for executive decisions.",
+          "behaviours": [
+            "Prepares KPI reports and dashboards on schedule with accurate data.",
+            "Analyses variances against plan and identifies drivers and follow-up actions.",
+            "Structures executive presentations that lead with conclusions and recommendations, and runs performance reviews.",
+            "Designs the enterprise performance management system and influences board-level decisions."
+          ]
+        }
+      ]
+    }
+  ]
+}

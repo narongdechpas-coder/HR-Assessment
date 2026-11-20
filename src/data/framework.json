@@ -64,6 +64,12 @@
    "id": "D13",
    "name": "Operations",
    "scope": "Policy/transaction operations, process management, quality and service productivity"
+  },
+  {
+   "id": "D14",
+   "name": "Corporate Strategy & Planning",
+   "scope": "Corporate strategy, business planning, forecasting, performance management and executive reporting",
+   "draft": true
   }
  ],
  "levels": [
@@ -982,6 +988,62 @@
     "Ensures team controls and manages incidents.",
     "Sets risk culture and aligns decisions to risk appetite."
    ]
+  },
+  {
+   "id": "SP01",
+   "name": "Strategic Analysis & Market Intelligence",
+   "definition": "Analyse market, competitor, regulatory and macro trends to inform strategic choices.",
+   "behaviours": [
+    "Collects market and competitor data from defined sources and keeps trackers up to date.",
+    "Analyses market share, growth and competitor moves and summarises implications for the company.",
+    "Frames strategic questions, combines multiple sources and recommends options with clear trade-offs.",
+    "Anticipates industry shifts and shapes the strategic agenda of senior management."
+   ],
+   "group": "functional",
+   "dept": "D14",
+   "draft": true
+  },
+  {
+   "id": "SP02",
+   "name": "Business Planning & Target Setting",
+   "definition": "Translate strategy into business plans, targets and resource allocation aligned with capital and risk appetite.",
+   "behaviours": [
+    "Prepares planning templates and consolidates inputs from departments accurately.",
+    "Builds department and company plans, checks consistency of targets and challenges unrealistic inputs.",
+    "Leads the annual planning cycle and aligns targets with capital, risk appetite and resource constraints.",
+    "Sets the planning framework and negotiates enterprise targets with executives and shareholders."
+   ],
+   "group": "functional",
+   "dept": "D14",
+   "draft": true
+  },
+  {
+   "id": "SP03",
+   "name": "Financial Forecasting & Scenario Modelling",
+   "definition": "Build forecasts and scenarios for premium, loss ratio, combined ratio, capital and profit.",
+   "behaviours": [
+    "Updates forecast models with actual results following defined steps.",
+    "Builds forecasts for premium, loss ratio and expenses and explains key assumptions.",
+    "Designs scenario and sensitivity analyses and quantifies the impact on profit and capital.",
+    "Owns the forecasting methodology and advises executives on strategic and capital decisions."
+   ],
+   "group": "functional",
+   "dept": "D14",
+   "draft": true
+  },
+  {
+   "id": "SP04",
+   "name": "Performance Management & Executive Reporting",
+   "definition": "Track strategic KPIs, analyse variances and present insights for executive decisions.",
+   "behaviours": [
+    "Prepares KPI reports and dashboards on schedule with accurate data.",
+    "Analyses variances against plan and identifies drivers and follow-up actions.",
+    "Structures executive presentations that lead with conclusions and recommendations, and runs performance reviews.",
+    "Designs the enterprise performance management system and influences board-level decisions."
+   ],
+   "group": "functional",
+   "dept": "D14",
+   "draft": true
   }
  ],
  "targets": {
@@ -4479,6 +4541,275 @@
      "LEAD06": 4,
      "LEAD07": 4,
      "LEAD08": 4
+    }
+   }
+  },
+  "D14": {
+   "L1": {
+    "Management": {
+     "CORE01": 2,
+     "CORE02": 2,
+     "CORE03": 2,
+     "CORE04": 2,
+     "CORE05": 1,
+     "CORE06": 2,
+     "CORE07": 2,
+     "CORE08": 1,
+     "LEAD01": 1,
+     "LEAD02": 1,
+     "LEAD05": 1,
+     "LEAD06": 1,
+     "LEAD07": 1,
+     "LEAD08": 1,
+     "SP01": 2,
+     "SP02": 2,
+     "SP03": 2,
+     "SP04": 2
+    },
+    "Specialist": {
+     "CORE01": 2,
+     "CORE02": 2,
+     "CORE03": 2,
+     "CORE04": 2,
+     "CORE05": 1,
+     "CORE06": 2,
+     "CORE07": 2,
+     "CORE08": 1,
+     "LEAD02": 1,
+     "LEAD06": 1,
+     "LEAD07": 1,
+     "LEAD08": 1,
+     "SP01": 2,
+     "SP02": 2,
+     "SP03": 2,
+     "SP04": 2
+    }
+   },
+   "L2": {
+    "Management": {
+     "CORE01": 2,
+     "CORE02": 3,
+     "CORE03": 3,
+     "CORE04": 3,
+     "CORE05": 2,
+     "CORE06": 2,
+     "CORE07": 2,
+     "CORE08": 2,
+     "LEAD01": 2,
+     "LEAD02": 2,
+     "LEAD04": 1,
+     "LEAD05": 2,
+     "LEAD06": 2,
+     "LEAD07": 2,
+     "LEAD08": 2,
+     "SP01": 3,
+     "SP02": 3,
+     "SP03": 3,
+     "SP04": 3
+    },
+    "Specialist": {
+     "CORE01": 2,
+     "CORE02": 3,
+     "CORE03": 3,
+     "CORE04": 3,
+     "CORE05": 2,
+     "CORE06": 2,
+     "CORE07": 2,
+     "CORE08": 2,
+     "LEAD02": 2,
+     "LEAD04": 1,
+     "LEAD05": 1,
+     "LEAD06": 2,
+     "LEAD07": 2,
+     "LEAD08": 2,
+     "SP01": 3,
+     "SP02": 3,
+     "SP03": 3,
+     "SP04": 3
+    }
+   },
+   "L3": {
+    "Management": {
+     "CORE01": 3,
+     "CORE02": 3,
+     "CORE03": 3,
+     "CORE04": 3,
+     "CORE05": 3,
+     "CORE06": 3,
+     "CORE07": 3,
+     "CORE08": 3,
+     "LEAD01": 2,
+     "LEAD02": 3,
+     "LEAD03": 2,
+     "LEAD04": 2,
+     "LEAD05": 2,
+     "LEAD06": 3,
+     "LEAD07": 3,
+     "LEAD08": 3,
+     "SP01": 3,
+     "SP02": 3,
+     "SP03": 3,
+     "SP04": 3
+    },
+    "Specialist": {
+     "CORE01": 3,
+     "CORE02": 3,
+     "CORE03": 3,
+     "CORE04": 3,
+     "CORE05": 3,
+     "CORE06": 3,
+     "CORE07": 3,
+     "CORE08": 3,
+     "LEAD01": 2,
+     "LEAD02": 3,
+     "LEAD03": 1,
+     "LEAD04": 1,
+     "LEAD05": 2,
+     "LEAD06": 3,
+     "LEAD07": 3,
+     "LEAD08": 3,
+     "SP01": 3,
+     "SP02": 3,
+     "SP03": 3,
+     "SP04": 3
+    }
+   },
+   "L4": {
+    "Management": {
+     "CORE01": 3,
+     "CORE02": 4,
+     "CORE03": 3,
+     "CORE04": 4,
+     "CORE05": 3,
+     "CORE06": 3,
+     "CORE07": 4,
+     "CORE08": 3,
+     "LEAD01": 3,
+     "LEAD02": 3,
+     "LEAD03": 3,
+     "LEAD04": 3,
+     "LEAD05": 3,
+     "LEAD06": 3,
+     "LEAD07": 3,
+     "LEAD08": 4,
+     "SP01": 4,
+     "SP02": 4,
+     "SP03": 4,
+     "SP04": 4
+    },
+    "Specialist": {
+     "CORE01": 3,
+     "CORE02": 4,
+     "CORE03": 3,
+     "CORE04": 4,
+     "CORE05": 3,
+     "CORE06": 3,
+     "CORE07": 4,
+     "CORE08": 3,
+     "LEAD01": 3,
+     "LEAD02": 3,
+     "LEAD03": 1,
+     "LEAD04": 2,
+     "LEAD05": 2,
+     "LEAD06": 3,
+     "LEAD07": 3,
+     "LEAD08": 4,
+     "SP01": 4,
+     "SP02": 4,
+     "SP03": 4,
+     "SP04": 4
+    }
+   },
+   "L5": {
+    "Management": {
+     "CORE01": 4,
+     "CORE02": 4,
+     "CORE03": 4,
+     "CORE04": 4,
+     "CORE05": 4,
+     "CORE06": 3,
+     "CORE07": 4,
+     "CORE08": 4,
+     "LEAD01": 4,
+     "LEAD02": 4,
+     "LEAD03": 4,
+     "LEAD04": 4,
+     "LEAD05": 4,
+     "LEAD06": 4,
+     "LEAD07": 4,
+     "LEAD08": 4,
+     "SP01": 4,
+     "SP02": 4,
+     "SP03": 4,
+     "SP04": 4
+    },
+    "Specialist": {
+     "CORE01": 4,
+     "CORE02": 4,
+     "CORE03": 4,
+     "CORE04": 4,
+     "CORE05": 4,
+     "CORE06": 3,
+     "CORE07": 4,
+     "CORE08": 4,
+     "LEAD01": 4,
+     "LEAD02": 4,
+     "LEAD03": 2,
+     "LEAD04": 2,
+     "LEAD05": 3,
+     "LEAD06": 4,
+     "LEAD07": 4,
+     "LEAD08": 4,
+     "SP01": 4,
+     "SP02": 4,
+     "SP03": 4,
+     "SP04": 4
+    }
+   },
+   "L6": {
+    "Management": {
+     "CORE01": 4,
+     "CORE02": 4,
+     "CORE03": 4,
+     "CORE04": 4,
+     "CORE05": 4,
+     "CORE06": 4,
+     "CORE07": 4,
+     "CORE08": 4,
+     "LEAD01": 4,
+     "LEAD02": 4,
+     "LEAD03": 4,
+     "LEAD04": 4,
+     "LEAD05": 4,
+     "LEAD06": 4,
+     "LEAD07": 4,
+     "LEAD08": 4,
+     "SP01": 4,
+     "SP02": 4,
+     "SP03": 4,
+     "SP04": 4
+    },
+    "Specialist": {
+     "CORE01": 4,
+     "CORE02": 4,
+     "CORE03": 4,
+     "CORE04": 4,
+     "CORE05": 4,
+     "CORE06": 4,
+     "CORE07": 4,
+     "CORE08": 4,
+     "LEAD01": 4,
+     "LEAD02": 4,
+     "LEAD03": 2,
+     "LEAD04": 3,
+     "LEAD05": 4,
+     "LEAD06": 4,
+     "LEAD07": 4,
+     "LEAD08": 4,
+     "SP01": 4,
+     "SP02": 4,
+     "SP03": 4,
+     "SP04": 4
     }
    }
   }

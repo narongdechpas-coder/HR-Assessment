@@ -72,6 +72,9 @@ export function FrameworkBrowser({ onBack }: { onBack: () => void }) {
                   >
                     <span>
                       <span className="text-sm">{it.name}</span>
+                      {it.draft && (
+                        <span className="ml-2 rounded-full bg-warn-soft px-2 py-0.5 text-[11px] font-medium text-warn-ink">ร่าง · ยังไม่อยู่ใน Excel</span>
+                      )}
                       <span className="block text-xs text-ink-3">{it.id} · {it.nameEn}</span>
                     </span>
                     <span className="shrink-0 rounded-full bg-brand-soft px-2.5 py-0.5 text-xs font-medium text-brand">

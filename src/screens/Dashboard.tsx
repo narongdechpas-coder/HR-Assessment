@@ -14,7 +14,7 @@ const DEPT_EN = Object.fromEntries(departments.map((d) => [d.id, d.name]))
 // รหัสสั้นสำหรับหัวคอลัมน์ heatmap
 const CODE: Record<string, string> = {
   D01: 'UW', D02: 'CL', D03: 'ACT', D04: 'SAL', D05: 'MKT', D06: 'CS', D07: 'RI',
-  D08: 'RM', D09: 'LC', D10: 'FIN', D11: 'IT', D12: 'HR', D13: 'OPS',
+  D08: 'RM', D09: 'LC', D10: 'FIN', D11: 'IT', D12: 'HR', D13: 'OPS', D14: 'STR',
 }
 
 // สเกลเขียว-เหลือง-ส้ม-แดง ตาม % คนที่ต่ำกว่าเป้า (ช่วงตายตัว ไล่ความเข้มอ่อน→เข้ม เผื่อคนตาบอดสี)

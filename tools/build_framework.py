@@ -46,6 +46,26 @@ for r in rows("Master Matrix"):
     targets.setdefault(dept_id[dept], {}).setdefault(level, {}).setdefault(track, {})[cid] = int(target)
     count += 1
 
+# ── ร่างเพิ่มเติมที่ยังไม่อยู่ใน Excel (source/extensions.json) ──
+EXT = ROOT / "source" / "extensions.json"
+draft_count = 0
+if EXT.exists():
+    ext = json.loads(EXT.read_text(encoding="utf-8"))
+    nonfunctional = {c["id"] for c in competencies if c["group"] != "functional"}
+    for d in ext["departments"]:
+        departments.append({"id": d["id"], "name": d["name"], "scope": d["scope"], "draft": True})
+        for c in d["competencies"]:
+            competencies.append({**c, "group": "functional", "dept": d["id"], "draft": True})
+        ref = targets[d["copyCoreLeadershipFrom"]]
+        targets[d["id"]] = {}
+        for level, tracks in ref.items():
+            for track, row in tracks.items():
+                new = {cid: v for cid, v in row.items() if cid in nonfunctional}
+                for c in d["competencies"]:
+                    new[c["id"]] = d["functionalTargets"][level]
+                targets[d["id"]].setdefault(level, {})[track] = new
+                draft_count += len(new)
+
 OUT.write_text(
     json.dumps(
         {"departments": departments, "levels": levels, "competencies": competencies, "targets": targets},
@@ -54,4 +74,4 @@ OUT.write_text(
     ),
     encoding="utf-8",
 )
-print(f"wrote {OUT.relative_to(ROOT)}: {len(competencies)} competencies, {count} matrix rows")
+print(f"wrote {OUT.relative_to(ROOT)}: {len(competencies)} competencies, {count} matrix rows from Excel + {draft_count} draft rows")

@@ -6,9 +6,10 @@ import data from '../data/framework.json'
 
 describe('framework from Excel', () => {
   it('has the same size as the workbook', () => {
-    expect(data.competencies).toHaveLength(68)
+    const fromExcel = data.competencies.filter((c) => !('draft' in c))
+    expect(fromExcel).toHaveLength(68)
     const rows = Object.values(data.targets).flatMap((l) => Object.values(l).flatMap((t) => Object.values(t).flatMap((c) => Object.values(c))))
-    expect(rows).toHaveLength(3003)
+    expect(rows).toHaveLength(3003 + 231) // Excel + ฝ่ายวางแผนกลยุทธ์ (ร่าง)
   })
 
   it('UW L1 Specialist: 8 core + 4 UW + 4 leadership = 16 items, ordered core→functional→leadership', () => {
@@ -44,11 +45,28 @@ describe('framework from Excel', () => {
   })
 })
 
+describe('draft department D14 (Corporate Strategy & Planning)', () => {
+  it('follows the same target rules as Excel departments', () => {
+    for (const lv of ['L1', 'L2', 'L3', 'L4', 'L5', 'L6'])
+      for (const tr of ['Management', 'Specialist'] as const) {
+        const a = profileFor('D14', lv, tr)
+        const b = profileFor('D10', lv, tr)
+        expect(a.filter((x) => x.group !== 'functional').map((x) => [x.id, x.target])).toEqual(
+          b.filter((x) => x.group !== 'functional').map((x) => [x.id, x.target]),
+        )
+        expect(a.filter((x) => x.group === 'functional').map((x) => x.target)).toEqual(
+          b.filter((x) => x.group === 'functional').map((x) => x.target),
+        )
+        expect(a.filter((x) => x.group === 'functional').every((x) => x.draft && x.id.startsWith('SP'))).toBe(true)
+      }
+  })
+})
+
 describe('mock organisation', () => {
-  it('13 departments × 5 people, L5→L1, reporting lines inside the department', () => {
+  it('14 departments × 5 people, L5→L1, reporting lines inside the department', () => {
     const byDept = new Map<string, typeof EMPLOYEES>()
     for (const e of EMPLOYEES) byDept.set(e.dept, [...(byDept.get(e.dept) ?? []), e])
-    expect(byDept.size).toBe(13)
+    expect(byDept.size).toBe(14)
     for (const [d, list] of byDept) {
       expect(list.map((e) => e.level), d).toEqual(['L5', 'L4', 'L3', 'L2', 'L1'])
       for (const e of list) if (e.managerId) expect(EMPLOYEES.find((m) => m.id === e.managerId)?.dept).toBe(d)

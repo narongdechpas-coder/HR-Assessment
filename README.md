@@ -1,7 +1,7 @@
 # HR Assessment (Demo)
 
 แบบประเมินสมรรถนะตนเองตาม Non-Life Insurance Competency Matrix
-ครบ 13 ฝ่าย ฝ่ายละ 5 คน (L5–L1) · ข้อคำถามต่างกันตามฝ่าย Level และ Track ตาม Master Matrix
+ครบ 14 ฝ่าย ฝ่ายละ 5 คน (L5–L1) · ข้อคำถามต่างกันตามฝ่าย Level และ Track ตาม Master Matrix
 
 ```bash
 npm install
@@ -14,5 +14,6 @@ npm run framework  # แปลง source/*.xlsx → src/data/framework.json (ร
 - ข้อมูลพนักงานและคะแนนทั้งหมดเป็นข้อมูลสมมติ (`src/data/mock.ts`)
 - Demo เก็บข้อมูลใน localStorage ของ browser เท่านั้น ตอนต่อระบบจริงให้แก้แค่ `src/store.ts`
 - คำแปลไทย (`src/data/th.ts`) เป็นร่าง ต้องให้ HR และหัวหน้าฝ่ายตรวจก่อนใช้จริง
+- ฝ่ายวางแผนกลยุทธ์องค์กร (D14) ไม่มีใน Excel — ร่างไว้ใน `source/extensions.json` (App ติดป้าย "ร่าง") เมื่อยืนยันแล้วให้ย้ายเข้า Excel master แล้วลบออกจากไฟล์นี้
 
 สถานะ: Demo ครบ 3 ส่วน — ประเมินตนเอง · หัวหน้าทบทวน · HR Dashboard + Export Excel (ฟอร์แมต Assessment Template)
