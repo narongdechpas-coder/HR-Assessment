@@ -207,9 +207,9 @@ export type DeptFunctional = {
   below2: number
   ok: number
   rate: number
-  comps: CompStack[] // 4 หัวข้อ Functional ของฝ่ายนี้ เรียงจากอัตราต่ำกว่าเป้ามากไปน้อย
+  comps: CompStack[] // หัวข้อ Functional ของฝ่ายนี้ เรียงจากอัตราต่ำกว่าเป้ามากไปน้อย
 }
-/** Functional แยกตามฝ่าย (แต่ละฝ่ายมี 4 หัวข้อของตัวเอง) */
+/** Functional แยกตามฝ่าย (แต่ละฝ่ายมีหัวข้อของตัวเอง ส่วนใหญ่ 4 ข้อ) */
 export function functionalByDept(rows: Row[]): DeptFunctional[] {
   const fn = rows.filter((r) => r.item.group === 'functional')
   const depts = [...new Set(fn.map((r) => r.emp.dept))].sort()

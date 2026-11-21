@@ -9,7 +9,7 @@ describe('framework from Excel', () => {
     const fromExcel = data.competencies.filter((c) => !('draft' in c))
     expect(fromExcel).toHaveLength(68)
     const rows = Object.values(data.targets).flatMap((l) => Object.values(l).flatMap((t) => Object.values(t).flatMap((c) => Object.values(c))))
-    expect(rows).toHaveLength(3003 + 231) // Excel + ฝ่ายวางแผนกลยุทธ์ (ร่าง)
+    expect(rows).toHaveLength(3003 + 231 + 12) // Excel + ฝ่ายวางแผนกลยุทธ์ (ร่าง: 4 ข้อ + SP05 อีก 12 ตำแหน่ง)
   })
 
   it('UW L1 Specialist: 8 core + 4 UW + 4 leadership = 16 items, ordered core→functional→leadership', () => {
@@ -54,9 +54,10 @@ describe('draft department D14 (Corporate Strategy & Planning)', () => {
         expect(a.filter((x) => x.group !== 'functional').map((x) => [x.id, x.target])).toEqual(
           b.filter((x) => x.group !== 'functional').map((x) => [x.id, x.target]),
         )
-        expect(a.filter((x) => x.group === 'functional').map((x) => x.target)).toEqual(
-          b.filter((x) => x.group === 'functional').map((x) => x.target),
-        )
+        const fnTarget = b.find((x) => x.group === 'functional')!.target
+        const fn = a.filter((x) => x.group === 'functional')
+        expect(fn.map((x) => x.id)).toEqual(['SP01', 'SP02', 'SP03', 'SP04', 'SP05'])
+        expect(fn.every((x) => x.target === fnTarget)).toBe(true)
         expect(a.filter((x) => x.group === 'functional').every((x) => x.draft && x.id.startsWith('SP'))).toBe(true)
       }
   })

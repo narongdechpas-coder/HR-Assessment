@@ -4,8 +4,15 @@
     {
       "id": "D14",
       "name": "Corporate Strategy & Planning",
-      "scope": "Corporate strategy, business planning, forecasting, performance management and executive reporting",
-      "functionalTargets": { "L1": 2, "L2": 3, "L3": 3, "L4": 4, "L5": 4, "L6": 4 },
+      "scope": "Corporate strategy, business planning, forecasting, strategic initiatives, performance management and executive reporting",
+      "functionalTargets": {
+        "L1": 2,
+        "L2": 3,
+        "L3": 3,
+        "L4": 4,
+        "L5": 4,
+        "L6": 4
+      },
       "copyCoreLeadershipFrom": "D01",
       "competencies": [
         {
@@ -50,6 +57,17 @@
             "Analyses variances against plan and identifies drivers and follow-up actions.",
             "Structures executive presentations that lead with conclusions and recommendations, and runs performance reviews.",
             "Designs the enterprise performance management system and influences board-level decisions."
+          ]
+        },
+        {
+          "id": "SP05",
+          "name": "Strategic Project & Initiative Management",
+          "definition": "Plan, deliver and track strategic initiatives so that they achieve their intended business benefits.",
+          "behaviours": [
+            "Tracks project milestones, actions and issues in the project register and reports status on time.",
+            "Runs workstreams independently: plans, coordinates owners, flags risks and escalates delays.",
+            "Leads cross-functional strategic initiatives, manages dependencies and measures benefits against the business case.",
+            "Governs the strategic initiative portfolio, prioritises investment and steers transformation with executives."
           ]
         }
       ]

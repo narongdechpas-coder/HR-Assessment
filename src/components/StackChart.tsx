@@ -142,7 +142,7 @@ function Detail({ tip }: { tip: string[] }) {
   )
 }
 
-/** Functional: ภาพรวมรายฝ่าย แล้วเลือกฝ่ายเพื่อดู 4 หัวข้อของฝ่ายนั้น */
+/** Functional: ภาพรวมรายฝ่าย แล้วเลือกฝ่ายเพื่อดูหัวข้อของฝ่ายนั้น */
 export function FunctionalByDept({ depts }: { depts: DeptFunctional[] }) {
   const [active, setActive] = useState<string | null>(null)
   const [pick, setPick] = useState<string>(depts[0]?.dept ?? '')
@@ -151,7 +151,7 @@ export function FunctionalByDept({ depts }: { depts: DeptFunctional[] }) {
   const cur = depts.find((d) => d.dept === active) ?? chosen
   return (
     <div>
-      <p className="mt-3 text-xs font-medium text-ink-2">ภาพรวมรายฝ่าย (แตะแท่งเพื่อดู 4 หัวข้อของฝ่ายนั้น)</p>
+      <p className="mt-3 text-xs font-medium text-ink-2">ภาพรวมรายฝ่าย (แตะแท่งเพื่อดูหัวข้อของฝ่ายนั้น)</p>
       <div className="relative overflow-x-auto [contain:inline-size]">
         <div className="flex min-w-max items-end gap-1 sm:min-w-0">
           {depts.map((d) => (
@@ -176,7 +176,7 @@ export function FunctionalByDept({ depts }: { depts: DeptFunctional[] }) {
         <div className="font-medium text-ink">{TH_DEPT[cur.dept]}</div>
         <div className="text-ink-2">{tipFor('', cur).slice(1).join(' · ')}</div>
       </div>
-      <p className="mt-5 text-xs font-medium text-ink-2">หัวข้อ Functional ของ{TH_DEPT[chosen.dept]}</p>
+      <p className="mt-5 text-xs font-medium text-ink-2">หัวข้อ Functional ของ{TH_DEPT[chosen.dept]} ({chosen.comps.length} หัวข้อ)</p>
       <CompetencyStack key={chosen.dept} comps={chosen.comps} />
     </div>
   )

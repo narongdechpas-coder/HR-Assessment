@@ -292,7 +292,7 @@ export function Dashboard() {
       {/* 3. Heatmap */}
       <Card className="h-full">
         <h2 className="font-semibold">% คนที่ต่ำกว่าเป้า แยกตามฝ่าย</h2>
-        <p className="text-sm text-ink-2">เขียว = ส่วนใหญ่ถึงเป้า · แดง = ส่วนใหญ่ต่ำกว่าเป้า · Functional รวม 4 หัวข้อของแต่ละฝ่าย</p>
+        <p className="text-sm text-ink-2">เขียว = ส่วนใหญ่ถึงเป้า · แดง = ส่วนใหญ่ต่ำกว่าเป้า · Functional รวมทุกหัวข้อของแต่ละฝ่าย</p>
         <div className="relative mt-3 overflow-x-auto [contain:inline-size]">
           <table className="w-full min-w-[720px] table-fixed border-separate border-spacing-0.5 text-sm">
             <thead>
@@ -336,7 +336,7 @@ export function Dashboard() {
                         </td>
                       </tr>
                       <tr>
-                        <td className="sticky left-0 bg-surface py-1 pr-2 text-xs">Functional ของฝ่าย (4 หัวข้อ)</td>
+                        <td className="sticky left-0 bg-surface py-1 pr-2 text-xs">Functional ของฝ่าย (รวมทุกหัวข้อ)</td>
                         {[...DEPTS.map((d) => fnCells[d]), fnTotal.n ? fnTotal : null].map((c, j) => (
                           <td
                             key={j}

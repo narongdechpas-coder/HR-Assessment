@@ -68,7 +68,7 @@
   {
    "id": "D14",
    "name": "Corporate Strategy & Planning",
-   "scope": "Corporate strategy, business planning, forecasting, performance management and executive reporting",
+   "scope": "Corporate strategy, business planning, forecasting, strategic initiatives, performance management and executive reporting",
    "draft": true
   }
  ],
@@ -1040,6 +1040,20 @@
     "Analyses variances against plan and identifies drivers and follow-up actions.",
     "Structures executive presentations that lead with conclusions and recommendations, and runs performance reviews.",
     "Designs the enterprise performance management system and influences board-level decisions."
+   ],
+   "group": "functional",
+   "dept": "D14",
+   "draft": true
+  },
+  {
+   "id": "SP05",
+   "name": "Strategic Project & Initiative Management",
+   "definition": "Plan, deliver and track strategic initiatives so that they achieve their intended business benefits.",
+   "behaviours": [
+    "Tracks project milestones, actions and issues in the project register and reports status on time.",
+    "Runs workstreams independently: plans, coordinates owners, flags risks and escalates delays.",
+    "Leads cross-functional strategic initiatives, manages dependencies and measures benefits against the business case.",
+    "Governs the strategic initiative portfolio, prioritises investment and steers transformation with executives."
    ],
    "group": "functional",
    "dept": "D14",
@@ -4564,7 +4578,8 @@
      "SP01": 2,
      "SP02": 2,
      "SP03": 2,
-     "SP04": 2
+     "SP04": 2,
+     "SP05": 2
     },
     "Specialist": {
      "CORE01": 2,
@@ -4582,7 +4597,8 @@
      "SP01": 2,
      "SP02": 2,
      "SP03": 2,
-     "SP04": 2
+     "SP04": 2,
+     "SP05": 2
     }
    },
    "L2": {
@@ -4605,7 +4621,8 @@
      "SP01": 3,
      "SP02": 3,
      "SP03": 3,
-     "SP04": 3
+     "SP04": 3,
+     "SP05": 3
     },
     "Specialist": {
      "CORE01": 2,
@@ -4625,7 +4642,8 @@
      "SP01": 3,
      "SP02": 3,
      "SP03": 3,
-     "SP04": 3
+     "SP04": 3,
+     "SP05": 3
     }
    },
    "L3": {
@@ -4649,7 +4667,8 @@
      "SP01": 3,
      "SP02": 3,
      "SP03": 3,
-     "SP04": 3
+     "SP04": 3,
+     "SP05": 3
     },
     "Specialist": {
      "CORE01": 3,
@@ -4671,7 +4690,8 @@
      "SP01": 3,
      "SP02": 3,
      "SP03": 3,
-     "SP04": 3
+     "SP04": 3,
+     "SP05": 3
     }
    },
    "L4": {
@@ -4695,7 +4715,8 @@
      "SP01": 4,
      "SP02": 4,
      "SP03": 4,
-     "SP04": 4
+     "SP04": 4,
+     "SP05": 4
     },
     "Specialist": {
      "CORE01": 3,
@@ -4717,7 +4738,8 @@
      "SP01": 4,
      "SP02": 4,
      "SP03": 4,
-     "SP04": 4
+     "SP04": 4,
+     "SP05": 4
     }
    },
    "L5": {
@@ -4741,7 +4763,8 @@
      "SP01": 4,
      "SP02": 4,
      "SP03": 4,
-     "SP04": 4
+     "SP04": 4,
+     "SP05": 4
     },
     "Specialist": {
      "CORE01": 4,
@@ -4763,7 +4786,8 @@
      "SP01": 4,
      "SP02": 4,
      "SP03": 4,
-     "SP04": 4
+     "SP04": 4,
+     "SP05": 4
     }
    },
    "L6": {
@@ -4787,7 +4811,8 @@
      "SP01": 4,
      "SP02": 4,
      "SP03": 4,
-     "SP04": 4
+     "SP04": 4,
+     "SP05": 4
     },
     "Specialist": {
      "CORE01": 4,
@@ -4809,7 +4834,8 @@
      "SP01": 4,
      "SP02": 4,
      "SP03": 4,
-     "SP04": 4
+     "SP04": 4,
+     "SP05": 4
     }
    }
   }
